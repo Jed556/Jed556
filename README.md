@@ -14,6 +14,10 @@
   <a href="https://github.com/Jed556"><img src="https://github-readme-streak-stats.herokuapp.com/?user=Jed556&theme=dark&hide_border=true" alt="Jed556" width="844" /></a>
 </div>
 
+### <p align="center">Social Links</p>
+ <a href="https://discordapp.com/users/839430747088617472"><img src="https://discord.c99.nl/widget/theme-3/839430747088617472.png" alt="Jed556" height="91.7"></a>
+ <a href="https://discord.gg/5ezrYqutmD"><img src="https://discord.com/api/guilds/946241935742488616/widget.png?style=banner2" height="91.7"></a>
+
 ### <p align="center">Top Repositories</p>
   <a href="https://github.com/Jed556/Apollo"><img src = "https://github-readme-stats.vercel.app/api/pin?username=Jed556&repo=Apollo&title_color=fff&icon_color=f9f9f9&text_color=9f9f9f&bg_color=151515&hide_border=true" alt="Apollo" width="420" align="middle"></a>
   <a href="https://github.com/Jed556/plist-texture-editor"><img src = "https://github-readme-stats.vercel.app/api/pin?username=Jed556&repo=plist-texture-editor&title_color=fff&icon_color=f9f9f9&text_color=9f9f9f&bg_color=151515&hide_border=true" alt="plist texture editor" width="420" align="middle"></a>
