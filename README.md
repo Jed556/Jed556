@@ -51,9 +51,10 @@
   <a href="https://github.com/Jed556/plist-texture-editor"><img src = "https://github-readme-stats.vercel.app/api/pin?username=Jed556&repo=plist-texture-editor&title_color=00ffff&icon_color=61dafb&text_color=cfcfcf&bg_color=151515&hide_border=true" alt="plist texture editor" width="420" align="middle"></a>
   <br><br>
   <a href="https://github.com/Jed556/CSSK"><img src = "https://github-readme-stats.vercel.app/api/pin?username=Jed556&repo=CSSK&title_color=00ffff&icon_color=61dafb&text_color=cfcfcf&bg_color=151515&hide_border=true" alt="CSSK" width="420" align="middle"></a>
-  <a href="https://github.com/Jed556/HerokuManager"><img src = "https://github-readme-stats.vercel.app/api/pin?username=Jed556&repo=HerokuManager&title_color=00ffff&icon_color=61dafb&text_color=cfcfcf&bg_color=151515&hide_border=true" alt="Heroku Manager" width="420" align="middle"></a>
+  <a href="https://github.com/Jed556/Geometry-Jump"><img src = "https://github-readme-stats.vercel.app/api/pin?username=Jed556&repo=Geometry-Jump&title_color=00ffff&icon_color=61dafb&text_color=cfcfcf&bg_color=151515&hide_border=true" alt="Geometry Jump" width="420" align="middle"></a>
   <br><br>
   <a href="https://github.com/Jed556/Colab-Blender-Renderer"><img src = "https://github-readme-stats.vercel.app/api/pin?username=Jed556&repo=Colab-Blender-Renderer&title_color=00ffff&icon_color=61dafb&text_color=cfcfcf&bg_color=151515&hide_border=true" alt="Colab Blender Renderer" width="420" align="middle"></a>
   <a href="https://github.com/Jed556/ASAN-NA"><img src = "https://github-readme-stats.vercel.app/api/pin?username=Jed556&repo=ASAN-NA&title_color=00ffff&icon_color=61dafb&text_color=cfcfcf&bg_color=151515&hide_border=true" alt="ASAN NA" width="420" align="middle"></a>
   <br><br>
   <a href="https://github.com/Jed556/FFMPEG-Heroku-Buildpack"><img src = "https://github-readme-stats.vercel.app/api/pin?username=Jed556&repo=FFMPEG-Heroku-Buildpack&title_color=00ffff&icon_color=61dafb&text_color=cfcfcf&bg_color=151515&hide_border=true" alt="FFMPEG Heroku Buildpack" width="420" align="middle"></a>
+  <a href="https://github.com/Jed556/HerokuManager"><img src = "https://github-readme-stats.vercel.app/api/pin?username=Jed556&repo=HerokuManager&title_color=00ffff&icon_color=61dafb&text_color=cfcfcf&bg_color=151515&hide_border=true" alt="Heroku Manager" width="420" align="middle"></a>
