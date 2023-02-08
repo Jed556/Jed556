@@ -26,10 +26,10 @@
 <!-- Statistics -->
 <h3 align="center">Statistics</h3>
 <div align="left">
-  <a href="https://github.com/Jed556" ><img src="https://github-readme-stats.vercel.app/api?username=Jed556&custom_title=My%20Github%20Statistics&show_icons=true&locale=en&count_private=true&include_all_commits=true&theme=dark&hide_border=true&cache_seconds=1800&icon_color=00ffff&text_color=61dafb&title_color=00ffff&border_radius=7&card_width=390" alt="Jed556" /></a>&nbsp;
-  <a href="https://github.com/Jed556"><img src="https://github-readme-stats.vercel.app/api/top-langs?username=Jed556&custom_title=All%20Used%20Languages&title_color=fff&text_color=cfcfcf&layout=compact&theme=dark&hide_border=true&cache_seconds=1800&langs_count=20&border_radius=7&card_width=384" alt="Jed556" height="195" /></a>
+  <a href="https://github.com/Jed556" ><img src="https://github-readme-stats.vercel.app/api?username=Jed556&custom_title=My%20Github%20Statistics&show_icons=true&locale=en&count_private=true&include_all_commits=true&theme=dark&hide_border=true&cache_seconds=1800&icon_color=00ffff&text_color=61dafb&title_color=00ffff&border_radius=7&card_width=390" alt="Jed556"></a>&nbsp;
+  <a href="https://github.com/Jed556"><img src="https://github-readme-stats.vercel.app/api/top-langs?username=Jed556&custom_title=All%20Used%20Languages&title_color=fff&text_color=cfcfcf&layout=compact&theme=dark&hide_border=true&cache_seconds=1800&langs_count=20&border_radius=7&card_width=384" alt="Jed556" height="195"></a>
   <br>
-  <a href="https://github-readme-activity-graph.cyclic.app/graph?username=Jed556&custom_title=Contribution%20Graph&theme=react-dark&text_color=61dafb&bg_color=151515&title_color=fff&point=ccffff&color=fff&area=true&hide_border=true&radius=10" alt="Jed556" width="844">
+  <a href="https://github.com/Jed556"><img src="https://github-readme-activity-graph.cyclic.app/graph?username=Jed556&custom_title=Contribution%20Graph&theme=react-dark&text_color=61dafb&bg_color=151515&title_color=fff&point=ccffff&color=fff&area=true&hide_border=true&radius=10" alt="Jed556" width="844"></a>
   <a href="https://github.com/Jed556"><img src="https://github-readme-streak-stats.herokuapp.com/?user=Jed556&theme=dark&hide_border=true" alt="Jed556" width="844">
   </a>
 </div>
