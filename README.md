@@ -73,5 +73,5 @@
 <h3 align="center">Top Gists</h3>
 
   <div align="bottom">
-    <a href="https://github.com/Jed556/Bagley"><img src = "https://gists-readme.yizack.com/api/pin?user=Jed556&id=9f32c7702ec787994284a405d2e43c93&owner=true&theme=dark" alt="Bagley" width="420" align="middle"></a>
+    <a href="https://gist.github.com/Jed556/9f32c7702ec787994284a405d2e43c93"><img src = "https://gists-readme.yizack.com/api/pin?user=Jed556&id=9f32c7702ec787994284a405d2e43c93&owner=true&theme=dark" alt="Bagley" width="420" align="middle"></a>
   </div>
