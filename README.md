@@ -26,7 +26,7 @@
 <!-- Statistics -->
 <h3 align="center">Statistics</h3>
 <div align="left">
-  <a href="https://github.com/Jed556" ><img src="https://github-readme-stats.vercel.app/api?username=Jed556&custom_title=My%20Github%20Statistics&show_icons=true&locale=en&count_private=true&include_all_commits=true&theme=dark&hide_border=true&cache_seconds=1800&icon_color=00ffff&text_color=61dafb&title_color=00ffff&border_radius=7&card_width=390" alt="Jed556" height="196"></a>&nbsp;
+  <a href="https://github.com/Jed556"><img src="https://github-readme-stats.vercel.app/api?username=Jed556&custom_title=My%20Github%20Statistics&show_icons=true&locale=en&count_private=true&include_all_commits=true&theme=dark&hide_border=true&cache_seconds=1800&icon_color=00ffff&text_color=61dafb&title_color=00ffff&border_radius=7&card_width=390" alt="Jed556" height="196"></a>&nbsp;
   <a href="https://github.com/Jed556"><img src="https://github-readme-stats.vercel.app/api/top-langs?username=Jed556&custom_title=All%20Used%20Languages&title_color=fff&text_color=cfcfcf&layout=compact&theme=dark&hide_border=true&cache_seconds=1800&langs_count=20&border_radius=7&card_width=384" alt="Jed556" height="196"></a>
   <br>
   <a href="https://github.com/Jed556"><img src="https://github-readme-activity-graph.cyclic.app/graph?username=Jed556&custom_title=Contribution%20Graph&theme=react-dark&text_color=61dafb&bg_color=151515&title_color=fff&point=ccffff&color=fff&area=true&hide_border=true&radius=10" alt="Jed556" width="844"></a>
@@ -42,8 +42,6 @@
  <a href="https://discord.gg/5ezrYqutmD"><img src="https://discord.com/api/guilds/946241935742488616/widget.png?style=banner2" height="91.7"></a>
 
 <hr>
-
-<!-- Expertise -->
 
 <!-- Repositories -->
 <h3 align="center">Top Repositories</h3>
@@ -69,4 +67,11 @@
 
   <div align="bottom">
     <a href="https://github.com/Jed556/ASAN-NA"><img src = "https://github-readme-stats.vercel.app/api/pin?username=Jed556&repo=ASAN-NA&title_color=00ffff&icon_color=61dafb&text_color=cfcfcf&bg_color=151515&hide_border=true" alt="ASAN-NA" width="420" align="middle"></a>
+  </div>
+
+<!-- Repositories -->
+<h3 align="center">Top Gists</h3>
+
+  <div align="bottom">
+    <a href="https://github.com/Jed556/Bagley"><img src = "https://gists-readme.yizack.com/api/pin?user=Jed556&id=9f32c7702ec787994284a405d2e43c93&owner=true&theme=dark" alt="Bagley" width="420" align="middle"></a>
   </div>
