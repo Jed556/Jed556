@@ -3,8 +3,9 @@
   <img src="https://avatars.githubusercontent.com/u/84989546?v=4" alt="Jed556" align="middle" height="80">&nbsp;
   <img src="https://i.imgur.com/atjiZAC.png" alt="Title" align="middle"  height="120">
   <br>
-  <img src="https://komarev.com/ghpvc/?username=Jed556&label=views&color=0e75b6&style=flat" alt="Profile Views">
-  <img alt="GitHub Sponsors" src="https://img.shields.io/github/sponsors/Jed556">
+  <a href="#"><img src="https://komarev.com/ghpvc/?username=Jed556&label=views&color=0e75b6&style=flat" alt="Profile Views"></a>
+  <a href="#"><img alt="GitHub Sponsors" src="https://img.shields.io/github/sponsors/Jed556"></a>
+  <a href="https://wakatime.com/@a95a8ae5-2b84-47ae-b0e1-703225ad845f"><img src="https://wakatime.com/badge/user/a95a8ae5-2b84-47ae-b0e1-703225ad845f.svg" alt="Code time since Mar 9 2023" /></a>
 </h3>
 
 <br>
@@ -20,6 +21,13 @@
   <br>
   💬 You can ask me anything related to my expertise.
 </p>
+<div align="center">
+  <a href="https://discordapp.com/users/839430747088617472"><img src="svg/Discord.svg" alt="Discord" width="30"></a> &nbsp;
+  <a href="mailto:jguiriba11@gmail.com"><img src="svg/Gmail.svg" alt="Gmail" width="30"></a> &nbsp;
+  <a href="https://t.me/JG556"><img src="svg/Telegram.svg" alt="Telegram" width="30"></a> &nbsp;
+  <a href="https://twitter.com/556JED"><img src="svg/Twitter.svg" alt="Twitter" width="30"></a> &nbsp;
+  <a href="https://wakatime.com/@a95a8ae5-2b84-47ae-b0e1-703225ad845f"><img src="svg/WakaTime.svg" alt="WakaTime" width="30"></a>
+</div>
 
 
 <hr>
@@ -37,17 +45,6 @@
     <a href="https://github.com/Jed556"><img src="https://github-readme-streak-stats.herokuapp.com/?user=Jed556&theme=dark&currStreakLabel=61dafb&ring=00ffff&fire=00ffff&hide_border=true&mode=daily" alt="Jed556" width="844">
     </a>
   </div>
-</details>
-
-
-<hr>
-
-
-<!-- Social Media -->
-<details open="open">
-  <summary align="center"><h3>Social Links</h3></summary>
-  <a href="https://discordapp.com/users/839430747088617472"><img src="https://discord.c99.nl/widget/theme-3/839430747088617472.png" alt="Jed556" height="91.7"></a>
-  <a href="https://discord.gg/5ezrYqutmD"><img src="https://discord.com/api/guilds/946241935742488616/widget.png?style=banner2" height="91.7"></a>
 </details>
 
 
@@ -87,7 +84,7 @@
 
 
 
-<!-- Repositories -->
+<!-- Gists -->
 <details open="open">
   <summary align="center"><h3>Top Gists</h3></summary>
 
