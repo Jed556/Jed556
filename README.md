@@ -5,7 +5,7 @@
   <br>
   <a href="#"><img src="https://komarev.com/ghpvc/?username=Jed556&label=views&color=0e75b6&style=flat" alt="Profile Views"></a>
   <a href="#"><img alt="GitHub Sponsors" src="https://img.shields.io/github/sponsors/Jed556"></a>
-  <a href="https://wakatime.com/@a95a8ae5-2b84-47ae-b0e1-703225ad845f"><img src="https://wakatime.com/badge/user/a95a8ae5-2b84-47ae-b0e1-703225ad845f.svg" alt="Code time since Mar 9 2023" /></a>
+  <a href="https://wakatime.com/@a95a8ae5-2b84-47ae-b0e1-703225ad845f" target="_blank"><img src="https://wakatime.com/badge/user/a95a8ae5-2b84-47ae-b0e1-703225ad845f.svg" alt="Code time since Mar 9 2023" /></a>
 </h3>
 
 <br>
@@ -22,11 +22,11 @@
   💬 You can ask me anything related to my expertise.
 </p>
 <div align="center">
-  <a href="https://discordapp.com/users/839430747088617472"><img src="svg/Discord-W.svg" alt="Discord" width="30"></a> &nbsp;
-  <a href="mailto:jguiriba11@gmail.com"><img src="svg/Gmail-W.svg" alt="Gmail" width="30"></a> &nbsp;
-  <a href="https://t.me/JG556"><img src="svg/Telegram-W.svg" alt="Telegram" width="30"></a> &nbsp;
-  <a href="https://twitter.com/556JED"><img src="svg/Twitter-W.svg" alt="Twitter" width="30"></a> &nbsp;
-  <a href="https://wakatime.com/@a95a8ae5-2b84-47ae-b0e1-703225ad845f"><img src="svg/WakaTime-W.svg" alt="WakaTime" width="30"></a>
+  <a href="https://discordapp.com/users/839430747088617472" target="_blank"><img src="svg/Discord-W.svg" alt="Discord" width="30"></a> &nbsp;
+  <a href="mailto:jguiriba11@gmail.com" target="_blank"><img src="svg/Gmail-W.svg" alt="Gmail" width="30"></a> &nbsp;
+  <a href="https://t.me/JG556" target="_blank"><img src="svg/Telegram-W.svg" alt="Telegram" width="30"></a> &nbsp;
+  <a href="https://twitter.com/556JED" target="_blank"><img src="svg/Twitter-W.svg" alt="Twitter" width="30"></a> &nbsp;
+  <a href="https://wakatime.com/@a95a8ae5-2b84-47ae-b0e1-703225ad845f" target="_blank"><img src="svg/WakaTime-W.svg" alt="WakaTime" width="30"></a>
 </div>
 
 
@@ -56,28 +56,28 @@
   <summary align="center"><h3>Top Repositories</h3></summary>
 
   <div align="bottom">
-    <a href="https://github.com/Jed556/Apollo"><img src = "https://github-readme-stats.vercel.app/api/pin?username=Jed556&repo=Apollo&title_color=00ffff&icon_color=61dafb&text_color=cfcfcf&bg_color=151515&hide_border=true" alt="Apollo" width="420" align="middle"></a>
-    <a href="https://github.com/Jed556/Payloads"><img src = "https://github-readme-stats.vercel.app/api/pin?username=Jed556&repo=Payloads&title_color=00ffff&icon_color=61dafb&text_color=cfcfcf&bg_color=151515&hide_border=true" alt="Payloads" width="420" align="middle"></a>
+    <a href="https://github.com/Jed556/Apollo" target="_blank"><img src = "https://github-readme-stats.vercel.app/api/pin?username=Jed556&repo=Apollo&title_color=00ffff&icon_color=61dafb&text_color=cfcfcf&bg_color=151515&hide_border=true" alt="Apollo" width="420" align="middle"></a>
+    <a href="https://github.com/Jed556/Payloads" target="_blank"><img src = "https://github-readme-stats.vercel.app/api/pin?username=Jed556&repo=Payloads&title_color=00ffff&icon_color=61dafb&text_color=cfcfcf&bg_color=151515&hide_border=true" alt="Payloads" width="420" align="middle"></a>
   </div>
 
   <div align="bottom">
-    <a href="https://github.com/Jed556/plist-texture-editor"><img src = "https://github-readme-stats.vercel.app/api/pin?username=Jed556&repo=plist-texture-editor&title_color=00ffff&icon_color=61dafb&text_color=cfcfcf&bg_color=151515&hide_border=true" alt="plist texture editor" width="420" align="middle"></a>
-    <a href="https://github.com/Jed556/Geometry-Jump"><img src = "https://github-readme-stats.vercel.app/api/pin?username=Jed556&repo=Geometry-Jump&title_color=00ffff&icon_color=61dafb&text_color=cfcfcf&bg_color=151515&hide_border=true" alt="Geometry Jump" width="420" align="middle"></a>
+    <a href="https://github.com/Jed556/plist-texture-editor" target="_blank"><img src = "https://github-readme-stats.vercel.app/api/pin?username=Jed556&repo=plist-texture-editor&title_color=00ffff&icon_color=61dafb&text_color=cfcfcf&bg_color=151515&hide_border=true" alt="plist texture editor" width="420" align="middle"></a>
+    <a href="https://github.com/Jed556/Geometry-Jump" target="_blank"><img src = "https://github-readme-stats.vercel.app/api/pin?username=Jed556&repo=Geometry-Jump&title_color=00ffff&icon_color=61dafb&text_color=cfcfcf&bg_color=151515&hide_border=true" alt="Geometry Jump" width="420" align="middle"></a>
   </div>
 
   <div align="bottom">
-    <a href="https://github.com/Jed556/GPP"><img src = "https://github-readme-stats.vercel.app/api/pin?username=Jed556&repo=GPP&title_color=00ffff&icon_color=61dafb&text_color=cfcfcf&bg_color=151515&hide_border=true" alt="GPP" width="420" align="middle"></a>
-    <a href="https://github.com/Jed556/Minipoly"><img src = "https://github-readme-stats.vercel.app/api/pin?username=Jed556&repo=Minipoly&title_color=00ffff&icon_color=61dafb&text_color=cfcfcf&bg_color=151515&hide_border=true" alt="Minipoly" width="420" align="middle"></a>
+    <a href="https://github.com/Jed556/GPP" target="_blank"><img src = "https://github-readme-stats.vercel.app/api/pin?username=Jed556&repo=GPP&title_color=00ffff&icon_color=61dafb&text_color=cfcfcf&bg_color=151515&hide_border=true" alt="GPP" width="420" align="middle"></a>
+    <a href="https://github.com/Jed556/Minipoly" target="_blank"><img src = "https://github-readme-stats.vercel.app/api/pin?username=Jed556&repo=Minipoly&title_color=00ffff&icon_color=61dafb&text_color=cfcfcf&bg_color=151515&hide_border=true" alt="Minipoly" width="420" align="middle"></a>
   </div>
 
   <div align="bottom">
-    <a href="https://github.com/Jed556/CSSK"><img src = "https://github-readme-stats.vercel.app/api/pin?username=Jed556&repo=CSSK&title_color=00ffff&icon_color=61dafb&text_color=cfcfcf&bg_color=151515&hide_border=true" alt="CSSK" width="420" align="middle"></a>
-    <a href="https://github.com/Jed556/HerokuManager"><img src = "https://github-readme-stats.vercel.app/api/pin?username=Jed556&repo=HerokuManager&title_color=00ffff&icon_color=61dafb&text_color=cfcfcf&bg_color=151515&hide_border=true" alt="Heroku Manager" width="420" align="middle"></a>
+    <a href="https://github.com/Jed556/CSSK" target="_blank"><img src = "https://github-readme-stats.vercel.app/api/pin?username=Jed556&repo=CSSK&title_color=00ffff&icon_color=61dafb&text_color=cfcfcf&bg_color=151515&hide_border=true" alt="CSSK" width="420" align="middle"></a>
+    <a href="https://github.com/Jed556/HerokuManager" target="_blank"><img src = "https://github-readme-stats.vercel.app/api/pin?username=Jed556&repo=HerokuManager&title_color=00ffff&icon_color=61dafb&text_color=cfcfcf&bg_color=151515&hide_border=true" alt="Heroku Manager" width="420" align="middle"></a>
   </div>
 
   <div align="bottom">
-    <a href="https://github.com/Jed556/Colab-Blender-Renderer"><img src = "https://github-readme-stats.vercel.app/api/pin?username=Jed556&repo=Colab-Blender-Renderer&title_color=00ffff&icon_color=61dafb&text_color=cfcfcf&bg_color=151515&hide_border=true" alt="Colab Blender Renderer" width="420" align="middle"></a>
-    <a href="https://github.com/Jed556/ASAN-NA"><img src = "https://github-readme-stats.vercel.app/api/pin?username=Jed556&repo=ASAN-NA&title_color=00ffff&icon_color=61dafb&text_color=cfcfcf&bg_color=151515&hide_border=true" alt="ASAN-NA" width="420" align="middle"></a>
+    <a href="https://github.com/Jed556/Colab-Blender-Renderer" target="_blank"><img src = "https://github-readme-stats.vercel.app/api/pin?username=Jed556&repo=Colab-Blender-Renderer&title_color=00ffff&icon_color=61dafb&text_color=cfcfcf&bg_color=151515&hide_border=true" alt="Colab Blender Renderer" width="420" align="middle"></a>
+    <a href="https://github.com/Jed556/ASAN-NA" target="_blank"><img src = "https://github-readme-stats.vercel.app/api/pin?username=Jed556&repo=ASAN-NA&title_color=00ffff&icon_color=61dafb&text_color=cfcfcf&bg_color=151515&hide_border=true" alt="ASAN-NA" width="420" align="middle"></a>
   </div>
 
 </details>
@@ -89,7 +89,7 @@
   <summary align="center"><h3>Top Gists</h3></summary>
 
   <div align="bottom">
-    <a href="https://gist.github.com/Jed556/9f32c7702ec787994284a405d2e43c93"><img src = "https://gists-readme.yizack.com/api/pin?user=Jed556&id=9f32c7702ec787994284a405d2e43c93&owner=true&theme=dark" alt="Bagley" width="420" align="middle"></a>
+    <a href="https://gist.github.com/Jed556/9f32c7702ec787994284a405d2e43c93" target="_blank"><img src = "https://gists-readme.yizack.com/api/pin?user=Jed556&id=9f32c7702ec787994284a405d2e43c93&owner=true&theme=dark" alt="Bagley" width="420" align="middle"></a>
   </div>
 
 </details>
