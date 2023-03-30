@@ -22,11 +22,11 @@
   💬 You can ask me anything related to my expertise.
 </p>
 <div align="center">
-  <a href="https://discordapp.com/users/839430747088617472"><img src="svg/Discord.svg" alt="Discord" width="30"></a> &nbsp;
-  <a href="mailto:jguiriba11@gmail.com"><img src="svg/Gmail.svg" alt="Gmail" width="30"></a> &nbsp;
-  <a href="https://t.me/JG556"><img src="svg/Telegram.svg" alt="Telegram" width="30"></a> &nbsp;
-  <a href="https://twitter.com/556JED"><img src="svg/Twitter.svg" alt="Twitter" width="30"></a> &nbsp;
-  <a href="https://wakatime.com/@a95a8ae5-2b84-47ae-b0e1-703225ad845f"><img src="svg/WakaTime.svg" alt="WakaTime" width="30"></a>
+  <a href="https://discordapp.com/users/839430747088617472"><img src="svg/Discord-W.svg" alt="Discord" width="30"></a> &nbsp;
+  <a href="mailto:jguiriba11@gmail.com"><img src="svg/Gmail-W.svg" alt="Gmail" width="30"></a> &nbsp;
+  <a href="https://t.me/JG556"><img src="svg/Telegram-W.svg" alt="Telegram" width="30"></a> &nbsp;
+  <a href="https://twitter.com/556JED"><img src="svg/Twitter-W.svg" alt="Twitter" width="30"></a> &nbsp;
+  <a href="https://wakatime.com/@a95a8ae5-2b84-47ae-b0e1-703225ad845f"><img src="svg/WakaTime-W.svg" alt="WakaTime" width="30"></a>
 </div>
 
 
