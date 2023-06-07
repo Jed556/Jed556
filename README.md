@@ -62,7 +62,7 @@
   </div>
   
   <div align="bottom">
-    <a href="https://github.com/Jed556/Colab-Blender-Renderer" target="_blank"><img src = "https://github-readme-stats.vercel.app/api/pin?username=Jed556&repo=Colab-Blender-Renderer&title_color=00ffff&icon_color=61dafb&text_color=cfcfcf&bg_color=151515&hide_border=true" alt="Colab Blender Renderer" width="420" align="middle"></a>
+    <a href="https://github.com/Jed556/AATMS" target="_blank"><img src = "https://github-readme-stats.vercel.app/api/pin?username=Jed556&repo=AATMS&title_color=00ffff&icon_color=61dafb&text_color=cfcfcf&bg_color=151515&hide_border=true" alt="AATMS" width="420" align="middle"></a>
     <a href="https://github.com/Jed556/ASANNA" target="_blank"><img src = "https://github-readme-stats.vercel.app/api/pin?username=Jed556&repo=ASANNA&title_color=00ffff&icon_color=61dafb&text_color=cfcfcf&bg_color=151515&hide_border=true" alt="ASANNA" width="420" align="middle"></a>
   </div>
 
