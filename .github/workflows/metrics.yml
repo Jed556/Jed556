@@ -17,7 +17,7 @@ on:
   push:
     branches: ["Jed"]
 jobs:
-  metrics:
+  update:
     runs-on: ubuntu-latest
     permissions:
       contents: write
