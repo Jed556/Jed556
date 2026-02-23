@@ -13,9 +13,11 @@ name: Metrics
 on:
   # Schedule updates (each hour)
   schedule: [{cron: "0 * * * *"}]
-  # Lines below let you run workflow manually and on each commit
-  workflow_dispatch:
-  push: {branches: ["master", "main"]}
+  # Manual execution
+  workflow_dispatch: {}
+  # Run on push to the default branch as well as historical names
+  push:
+    branches: ["Jed"]
 jobs:
   github-metrics:
     runs-on: ubuntu-latest
