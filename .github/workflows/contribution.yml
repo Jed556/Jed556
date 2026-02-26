@@ -5,6 +5,9 @@ on:
     - cron: '0 0 * * *'  # Daily at midnight UTC
   workflow_dispatch:  # Manual trigger
 
+  push:
+    branches: ["Jed"]
+
 permissions:
   contents: write
 
