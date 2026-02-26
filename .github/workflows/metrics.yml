@@ -10,18 +10,25 @@
 name: Profile
 on:
   schedule: [{cron: "0 * * * *"}]
-  workflow_dispatch: # Manual trigger
+  workflow_dispatch:
+    inputs:
+      run:
+        description: "Comma-separated list of targets to execute (user,repositories,languages,wakatime,anilist,steam,new_game,all)"
+        required: true
+        default: "all"
   push:
     branches: ["Jed"]
 
 jobs:
 
   Metrics:
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.run == 'all' || contains(inputs.run, 'user') || contains(inputs.run, 'repositories') || contains(inputs.run, 'languages') || contains(inputs.run, 'wakatime') || contains(inputs.run, 'anilist') || contains(inputs.run, 'steam') }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
       - name: User
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.run == 'all' || contains(inputs.run, 'user') }}
         uses: lowlighter/metrics@latest
         with:
           token: ${{ secrets.METRICS_TOKEN }}
@@ -33,6 +40,7 @@ jobs:
           config_timezone: Asia/Manila
 
       - name: Repositories
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.run == 'all' || contains(inputs.run, 'repositories') }}
         uses: lowlighter/metrics@latest
         with:
           token: ${{ secrets.METRICS_TOKEN }}
@@ -45,6 +53,7 @@ jobs:
           repositories_forks: yes
 
       - name: Languages
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.run == 'all' || contains(inputs.run, 'languages') }}
         uses: lowlighter/metrics@latest
         with:
           token: ${{ secrets.METRICS_TOKEN }}
@@ -69,6 +78,7 @@ jobs:
           plugin_languages_threshold: 0%
 
       - name: WakaTime
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.run == 'all' || contains(inputs.run, 'wakatime') }}
         uses: lowlighter/metrics@latest
         with:
           token: NOT_NEEDED
@@ -86,6 +96,7 @@ jobs:
           plugin_wakatime_user: current
 
       - name: AniList
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.run == 'all' || contains(inputs.run, 'anilist') }}
         uses: lowlighter/metrics@latest
         with:
           token: NOT_NEEDED
@@ -102,6 +113,7 @@ jobs:
           plugin_anilist_user: Jed556
 
       - name: Steam
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.run == 'all' || contains(inputs.run, 'steam') }}
         uses: lowlighter/metrics@latest
         with:
           token: NOT_NEEDED
@@ -116,6 +128,7 @@ jobs:
           plugin_steam_user: jed_556
 
   New_Game:
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.run == 'all' || contains(inputs.run, 'new_game') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
