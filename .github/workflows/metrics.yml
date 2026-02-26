@@ -7,7 +7,7 @@
 #  - read:packages (for some packages related data)
 #  - repo          (optional, if you want to include private repositories)
 
-name: Metrics
+name: Profile
 on:
   schedule: [{cron: "0 * * * *"}]
   workflow_dispatch: # Manual trigger
@@ -16,7 +16,7 @@ on:
 
 jobs:
 
-  User:
+  Metrics:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -33,11 +33,6 @@ jobs:
           base: header, activity, community
           config_timezone: Asia/Manila
 
-  Repositories:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
       - name: Repositories
         uses: lowlighter/metrics@latest
         with:
@@ -51,11 +46,6 @@ jobs:
           config_timezone: Asia/Manila
           repositories_forks: yes
 
-  Languages:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
       - name: Languages
         uses: lowlighter/metrics@latest
         with:
@@ -81,11 +71,6 @@ jobs:
           plugin_languages_sections: most-used
           plugin_languages_threshold: 0%
 
-  WakaTime:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
       - name: WakaTime
         uses: lowlighter/metrics@latest
         with:
@@ -104,11 +89,6 @@ jobs:
           plugin_wakatime_url: https://wakatime.com/@Jed556
           plugin_wakatime_user: current
 
-  AniList:
-      runs-on: ubuntu-latest
-      permissions:
-        contents: write
-      steps:
       - name: AniList
         uses: lowlighter/metrics@latest
         with:
@@ -126,11 +106,6 @@ jobs:
           plugin_anilist_shuffle: yes
           plugin_anilist_user: Jed556
 
-  Steam:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
       - name: Steam
         uses: lowlighter/metrics@latest
         with:
@@ -159,7 +134,7 @@ jobs:
 
   Combine:
     runs-on: ubuntu-latest
-    needs: [User, Repositories, Languages, WakaTime, AniList, Steam, New_Game]
+    needs: [Metrics, New_Game]
     steps:
       - uses: actions/checkout@v6
       - name: Install ImageMagick
