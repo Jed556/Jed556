@@ -182,7 +182,7 @@ jobs:
           git commit -m "chore: update metrics"
           git push
       - name: Upload merged image
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v6
         with:
           name: merged-metrics
           path: profile/combined.svg
