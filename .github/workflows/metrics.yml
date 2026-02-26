@@ -26,7 +26,6 @@ jobs:
         with:
           token: ${{ secrets.METRICS_TOKEN }}
           filename: profile/user.svg
-          output_action: none
 
           # Options
           template: classic
@@ -38,7 +37,6 @@ jobs:
         with:
           token: ${{ secrets.METRICS_TOKEN }}
           filename: profile/repositories.svg
-          output_action: none
 
           # Options
           template: classic
@@ -51,7 +49,6 @@ jobs:
         with:
           token: ${{ secrets.METRICS_TOKEN }}
           filename: profile/languages.svg
-          output_action: none
 
           # Options
           template: classic
@@ -76,7 +73,6 @@ jobs:
         with:
           token: NOT_NEEDED
           filename: profile/wakatime.svg
-          output_action: none
 
           # Options
           config_timezone: Asia/Manila
@@ -94,7 +90,6 @@ jobs:
         with:
           token: NOT_NEEDED
           filename: profile/anilist.svg
-          output_action: none
 
           # Options
           config_timezone: Asia/Manila
@@ -111,7 +106,6 @@ jobs:
         with:
           token: NOT_NEEDED
           filename: profile/steam.svg
-          output_action: none
 
           # Options
           config_timezone: Asia/Manila
@@ -131,33 +125,3 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           output-path: 'profile/game.gif'
           strategy: 'random'
-
-  Combine:
-    runs-on: ubuntu-latest
-    needs: [Metrics, New_Game]
-    steps:
-      - uses: actions/checkout@v6
-      - name: Install ImageMagick
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y imagemagick
-      - name: Merge metrics images
-        run: |
-          mkdir -p profile
-          convert +append \
-            \( profile/user.svg profile/repositories.svg profile/languages.svg profile/game.gif -append \) \
-            \( profile/wakatime.svg profile/anilist.svg profile/steam.svg -append \) \
-            profile/combined.svg
-      - name: Commit combined image
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add profile/combined.svg
-          git add profile/*.svg profile/*.gif
-          git commit -m "chore: update metrics"
-          git push
-      - name: Upload merged image
-        uses: actions/upload-artifact@v6
-        with:
-          name: merged-metrics
-          path: profile/combined.svg
