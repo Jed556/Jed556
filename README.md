@@ -1,4 +1,9 @@
 <a href="#">
+    <img align="center" width="100%" src="https://github.com/Jed556/Jed556/blob/Jed/profile/combined.svg">
+</a>
+
+<!--
+<a href="#">
     <img align="left" width="45%" src="https://github.com/Jed556/Jed556/blob/Jed/profile/user.svg">
 </a>
 <a href="https://github.com/Jed556?tab=repositories">
@@ -19,3 +24,4 @@
 <a href="https://github.com/Jed556">
     <img align="right" width="45%" src="https://github.com/Jed556/Jed556/blob/Jed/profile/game.gif">
 </a>
+-->
