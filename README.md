@@ -8,5 +8,5 @@
     <img align="right" width="45%" src="https://github.com/Jed556/Jed556/blob/Jed/profile/anilist.svg">
 </a>
 <a href="#">
-    <img align="left" width="45%" src="https://github.com/Jed556/Jed556/blob/Jed/profile/game.gif">
+    <img align="right" width="45%" src="https://github.com/Jed556/Jed556/blob/Jed/profile/game.gif">
 </a>
