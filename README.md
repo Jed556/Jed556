@@ -31,6 +31,10 @@
       <a href="https://steamcommunity.com/id/JED556/">
         <img src="https://github.com/Jed556/Jed556/blob/Jed/profile/steam.svg" width="100%" />
       </a>
+      <br />
+      <a href="https://open.spotify.com/user/31fp36sffumhmkdpotal7jwdjvuy">
+        <img src="https://github.com/Jed556/Jed556/blob/Jed/profile/spotify.svg" width="100%" />
+      </a>
     </td>
   </tr>
 </table>
