@@ -24,6 +24,8 @@ on:
       - profile/repositories.svg
       - profile/languages.svg
       - profile/wakatime.svg
+      - profile/habits.svg
+      - profile/activity.svg
       - profile/anilist.svg
       - profile/steam.svg
       - profile/spotify.svg
@@ -36,7 +38,7 @@ concurrency:
 jobs:
 
   Metrics:
-    if: ${{ github.event_name != 'workflow_dispatch' || inputs.run == 'all' || contains(inputs.run, 'user') || contains(inputs.run, 'repositories') || contains(inputs.run, 'languages') || contains(inputs.run, 'wakatime') || contains(inputs.run, 'anilist') || contains(inputs.run, 'steam') }}
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.run == 'all' || contains(inputs.run, 'user') || contains(inputs.run, 'repositories') || contains(inputs.run, 'languages') || contains(inputs.run, 'wakatime') || contains(inputs.run, 'habits') || contains(inputs.run, 'activity') || contains(inputs.run, 'anilist') || contains(inputs.run, 'steam') || contains(inputs.run, 'spotify') }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -111,6 +113,40 @@ jobs:
           plugin_wakatime_sections: time, projects, projects-graphs, languages, languages-graphs, editors, os
           plugin_wakatime_token: ${{ secrets.WAKATIME_TOKEN }}
           plugin_wakatime_user: current
+      
+      - name: Habits
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.run == 'all' || contains(inputs.run, 'habits') }}
+        continue-on-error: true
+        uses: lowlighter/metrics@latest
+        with:
+          token: ${{ secrets.METRICS_TOKEN }}
+          filename: profile/habits.svg
+
+          # Options
+          config_timezone: Asia/Manila
+          plugin_habits: yes
+          plugin_habits_from: 500
+          plugin_habits_days: 30
+          plugin_habits_facts: yes
+
+      - name: Activity
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.run == 'all' || contains(inputs.run, 'activity') }}
+        continue-on-error: true
+        uses: lowlighter/metrics@latest
+        with:
+          token: ${{ secrets.METRICS_TOKEN }}
+          filename: profile/activity.svg
+
+          # Options
+          template: classic
+          config_timezone: Asia/Manila
+          plugin_activity: yes
+          plugin_activity_limit: 5
+          plugin_activity_load: 300
+          plugin_activity_days: 30
+          plugin_activity_visibility: all
+          plugin_activity_timestamps: yes
+          plugin_activity_filter: push, issue, pr, release, review, comment, fork, public
 
       - name: AniList
         if: ${{ github.event_name != 'workflow_dispatch' || inputs.run == 'all' || contains(inputs.run, 'anilist') }}
@@ -220,6 +256,7 @@ jobs:
             profile/repositories.svg
             profile/languages.svg
             profile/wakatime.svg
+            profile/habits.svg
             profile/anilist.svg
             profile/steam.svg
             profile/spotify.svg
@@ -234,7 +271,7 @@ jobs:
             fi
           done
 
-          git filter-branch -f --prune-empty --index-filter "git rm -r --cached --ignore-unmatch -- profile/user.svg profile/repositories.svg profile/languages.svg profile/wakatime.svg profile/anilist.svg profile/steam.svg profile/spotify.svg profile/game.gif" -- "$BRANCH"
+          git filter-branch -f --prune-empty --index-filter "git rm -r --cached --ignore-unmatch -- profile/user.svg profile/repositories.svg profile/languages.svg profile/wakatime.svg profile/habits.svg profile/activity.svg profile/anilist.svg profile/steam.svg profile/spotify.svg profile/game.gif" -- "$BRANCH"
 
           for file in "${FILES[@]}"; do
             if [ -f "$TMP_DIR/$file" ]; then
@@ -243,7 +280,7 @@ jobs:
             fi
           done
 
-          git add profile/user.svg profile/repositories.svg profile/languages.svg profile/wakatime.svg profile/anilist.svg profile/steam.svg profile/spotify.svg profile/game.gif || true
+          git add profile/user.svg profile/repositories.svg profile/languages.svg profile/wakatime.svg profile/habits.svg profile/activity.svg profile/anilist.svg profile/steam.svg profile/spotify.svg profile/game.gif || true
 
           if ! git diff --cached --quiet; then
             git commit -m "Compact generated profile asset history [skip ci]"

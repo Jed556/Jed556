@@ -12,8 +12,17 @@
       <a href="#">
         <img src="https://github.com/Jed556/Jed556/blob/Jed/profile/languages.svg" width="100%" />
       </a>
+      <br />
       <a href="https://wakatime.com/@Jed556">
         <img src="https://github.com/Jed556/Jed556/blob/Jed/profile/wakatime.svg" width="100%" />
+      </a>
+      <br />
+      <a href="#">
+        <img src="https://github.com/Jed556/Jed556/blob/Jed/profile/habits.svg" width="100%" />
+      </a>
+      <br />
+      <a href="#">
+        <img src="https://github.com/Jed556/Jed556/blob/Jed/profile/activity.svg" width="100%" />
       </a>
       <br />
       <a href="#">
