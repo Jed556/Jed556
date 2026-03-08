@@ -10,10 +10,10 @@
 name: Profile
 on:
   schedule:
-    # Daily refresh for profile metrics
-    - cron: "0 2 * * *"
-    # Weekly refresh for game GIF
-    - cron: "0 3 * * 0"
+    # Refresh for profile metrics
+    - cron: "0 * * * *"
+    # Refresh for game GIF
+    - cron: "0 * * * *"
   workflow_dispatch:
     inputs:
       run:
@@ -26,7 +26,7 @@ on:
 jobs:
 
   Metrics:
-    if: ${{ (github.event_name == 'schedule' && github.event.schedule == '0 2 * * *') || (github.event_name == 'workflow_dispatch' && (inputs.run == 'all' || contains(inputs.run, 'user') || contains(inputs.run, 'repositories') || contains(inputs.run, 'languages') || contains(inputs.run, 'wakatime') || contains(inputs.run, 'anilist') || contains(inputs.run, 'steam'))) }}
+    if: ${{ (github.event_name == 'schedule' && github.event.schedule == '0 * * * *') || (github.event_name == 'workflow_dispatch' && (inputs.run == 'all' || contains(inputs.run, 'user') || contains(inputs.run, 'repositories') || contains(inputs.run, 'languages') || contains(inputs.run, 'wakatime') || contains(inputs.run, 'anilist') || contains(inputs.run, 'steam'))) }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -132,7 +132,7 @@ jobs:
           plugin_steam_user: jed_556
 
   New_Game:
-    if: ${{ (github.event_name == 'schedule' && github.event.schedule == '0 3 * * 0') || (github.event_name == 'workflow_dispatch' && (inputs.run == 'all' || contains(inputs.run, 'new_game'))) }}
+    if: ${{ (github.event_name == 'schedule' && github.event.schedule == '0 * * * *') || (github.event_name == 'workflow_dispatch' && (inputs.run == 'all' || contains(inputs.run, 'new_game'))) }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
