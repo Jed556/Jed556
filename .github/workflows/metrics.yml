@@ -123,6 +123,7 @@ jobs:
           filename: profile/habits.svg
 
           # Options
+          base: ""
           config_timezone: Asia/Manila
           plugin_habits: yes
           plugin_habits_from: 500
@@ -138,7 +139,7 @@ jobs:
           filename: profile/activity.svg
 
           # Options
-          template: classic
+          base: ""
           config_timezone: Asia/Manila
           plugin_activity: yes
           plugin_activity_limit: 5
