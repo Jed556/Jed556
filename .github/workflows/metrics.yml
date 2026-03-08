@@ -9,20 +9,22 @@
 
 name: Profile
 on:
-  schedule: [{cron: "0 * * * *"}]
+  schedule:
+    # Daily refresh for profile metrics
+    - cron: "0 2 * * *"
+    # Weekly refresh for game GIF
+    - cron: "0 3 * * 0"
   workflow_dispatch:
     inputs:
       run:
         description: "Comma-separated list of targets to execute (user,repositories,languages,wakatime,anilist,steam,new_game,all)"
         required: true
         default: "all"
-  push:
-    branches: ["Jed"]
 
 jobs:
 
   Metrics:
-    if: ${{ github.event_name != 'workflow_dispatch' || inputs.run == 'all' || contains(inputs.run, 'user') || contains(inputs.run, 'repositories') || contains(inputs.run, 'languages') || contains(inputs.run, 'wakatime') || contains(inputs.run, 'anilist') || contains(inputs.run, 'steam') }}
+    if: ${{ (github.event_name == 'schedule' && github.event.schedule == '0 2 * * *') || (github.event_name == 'workflow_dispatch' && (inputs.run == 'all' || contains(inputs.run, 'user') || contains(inputs.run, 'repositories') || contains(inputs.run, 'languages') || contains(inputs.run, 'wakatime') || contains(inputs.run, 'anilist') || contains(inputs.run, 'steam'))) }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -109,7 +111,7 @@ jobs:
           plugin_anilist_limit_characters: 22
           plugin_anilist_medias: anime, manga
           plugin_anilist_sections: favorites
-          plugin_anilist_shuffle: yes
+          plugin_anilist_shuffle: no
           plugin_anilist_user: Jed556
 
       - name: Steam
@@ -128,7 +130,7 @@ jobs:
           plugin_steam_user: jed_556
 
   New_Game:
-    if: ${{ github.event_name != 'workflow_dispatch' || inputs.run == 'all' || contains(inputs.run, 'new_game') }}
+    if: ${{ (github.event_name == 'schedule' && github.event.schedule == '0 3 * * 0') || (github.event_name == 'workflow_dispatch' && (inputs.run == 'all' || contains(inputs.run, 'new_game'))) }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -139,3 +141,60 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           output-path: 'profile/game.gif'
           strategy: 'random'
+
+  Compact_History:
+    needs: [Metrics, New_Game]
+    if: ${{ always() && !cancelled() && (needs.Metrics.result == 'success' || needs.Metrics.result == 'skipped') && (needs.New_Game.result == 'success' || needs.New_Game.result == 'skipped') && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout full history
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
+
+      - name: Compact generated assets history
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          BRANCH="${GITHUB_REF_NAME}"
+          FILES=(
+            profile/user.svg
+            profile/repositories.svg
+            profile/languages.svg
+            profile/wakatime.svg
+            profile/anilist.svg
+            profile/steam.svg
+            profile/game.gif
+          )
+
+          TMP_DIR="$(mktemp -d)"
+          for file in "${FILES[@]}"; do
+            if [ -f "$file" ]; then
+              mkdir -p "$TMP_DIR/$(dirname "$file")"
+              cp "$file" "$TMP_DIR/$file"
+            fi
+          done
+
+          git filter-branch -f --prune-empty --index-filter "git rm -r --cached --ignore-unmatch -- profile/user.svg profile/repositories.svg profile/languages.svg profile/wakatime.svg profile/anilist.svg profile/steam.svg profile/game.gif" -- "$BRANCH"
+
+          for file in "${FILES[@]}"; do
+            if [ -f "$TMP_DIR/$file" ]; then
+              mkdir -p "$(dirname "$file")"
+              cp "$TMP_DIR/$file" "$file"
+            fi
+          done
+
+          git add profile/user.svg profile/repositories.svg profile/languages.svg profile/wakatime.svg profile/anilist.svg profile/steam.svg profile/game.gif || true
+
+          if ! git diff --cached --quiet; then
+            git commit -m "Compact generated profile asset history [skip ci]"
+          fi
+
+          git push --force-with-lease origin "$BRANCH"
