@@ -15,7 +15,7 @@ on:
   workflow_dispatch:
     inputs:
       run:
-        description: "Comma-separated list of targets to execute (user,repositories,languages,wakatime,anilist,steam,new_game,all)"
+        description: "Comma-separated list of targets to execute (user,repositories,gists,languages,wakatime,anilist,steam,new_game,all)"
         required: true
         default: "all"
   push:
@@ -23,6 +23,7 @@ on:
     paths-ignore:
       - profile/user.svg
       - profile/repositories.svg
+      - profile/gists.svg
       - profile/languages.svg
       - profile/wakatime.svg
       - profile/anilist.svg
@@ -50,7 +51,7 @@ jobs:
           token: ${{ secrets.METRICS_TOKEN }}
           filename: profile/user.svg
 
-          # Options
+          # OPTIONS
           template: classic
           base: header, activity, community
           config_timezone: Asia/Manila
@@ -63,11 +64,21 @@ jobs:
           token: ${{ secrets.METRICS_TOKEN }}
           filename: profile/repositories.svg
 
-          # Options
+          # OPTIONS
           template: classic
           base: repositories
           config_timezone: Asia/Manila
           repositories_forks: yes
+
+      - name: Gists
+        if: ${{ (github.event_name != 'workflow_dispatch' || inputs.run == 'all' || contains(inputs.run, 'gists')) && (github.event_name != 'schedule' || github.event.schedule == '0 * * * *') }}
+        continue-on-error: true
+        uses: lowlighter/metrics@latest
+        with:
+          filename: profile/gists.svg
+          token: ${{ secrets.METRICS_TOKEN }}
+          base: ""
+          plugin_gists: yes
 
       - name: Languages
         if: ${{ (github.event_name != 'workflow_dispatch' || inputs.run == 'all' || contains(inputs.run, 'languages')) && (github.event_name != 'schedule' || github.event.schedule == '0 * * * *') }}
@@ -77,22 +88,25 @@ jobs:
           token: ${{ secrets.METRICS_TOKEN }}
           filename: profile/languages.svg
 
-          # Options
+          # OPTIONS
           template: classic
           base: ""
           config_timezone: Asia/Manila
           plugin_languages: yes
-          plugin_languages_analysis_timeout: 15
-          plugin_languages_analysis_timeout_repositories: 7.5
-          plugin_languages_categories: markup, programming
           plugin_languages_colors: github
+          plugin_languages_sections: most-used
           plugin_languages_details: bytes-size, percentage
           plugin_languages_limit: 20
-          plugin_languages_other: yes
+          plugin_languages_other: no
+          # Indepth Analysis Options
+          plugin_languages_analysis_timeout: 60 #default: 15
+          plugin_languages_analysis_timeout_repositories: 0 #default: 7.5
+          # Most Used Options (Indepth)
+          plugin_languages_categories: markup, programming
+          # Recently Used Options (Indepth)
           plugin_languages_recent_categories: markup, programming
           plugin_languages_recent_days: 14
           plugin_languages_recent_load: 300
-          plugin_languages_sections: most-used
           plugin_languages_threshold: 0%
 
       - name: WakaTime
@@ -103,7 +117,7 @@ jobs:
           token: NOT_NEEDED
           filename: profile/wakatime.svg
 
-          # Options
+          # OPTIONS
           config_timezone: Asia/Manila
           plugin_wakatime: yes
           plugin_wakatime_days: 365
@@ -121,7 +135,7 @@ jobs:
           token: NOT_NEEDED
           filename: profile/anilist.svg
 
-          # Options
+          # OPTIONS
           config_timezone: Asia/Manila
           plugin_anilist: yes
           plugin_anilist_limit: 1
@@ -139,7 +153,7 @@ jobs:
           token: NOT_NEEDED
           filename: profile/steam.svg
 
-          # Options
+          # OPTIONS
           config_timezone: Asia/Manila
           plugin_steam: yes
           plugin_steam_token: ${{ secrets.STEAM_TOKEN }}
@@ -157,7 +171,7 @@ jobs:
           token: NOT_NEEDED
           filename: profile/spotify.svg
 
-          # Options
+          # OPTIONS
           config_timezone: Asia/Manila
           plugin_music: yes
           plugin_music_token: ${{ secrets.SPOTIFY_CLIENT_ID }}, ${{ secrets.SPOTIFY_CLIENT_SECRET }}, ${{ secrets.SPOTIFY_REFRESH_TOKEN }}
@@ -219,6 +233,7 @@ jobs:
           FILES=(
             profile/user.svg
             profile/repositories.svg
+            profile/gists.svg
             profile/languages.svg
             profile/wakatime.svg
             profile/anilist.svg
@@ -235,7 +250,7 @@ jobs:
             fi
           done
 
-          git filter-branch -f --prune-empty --index-filter "git rm -r --cached --ignore-unmatch -- profile/user.svg profile/repositories.svg profile/languages.svg profile/wakatime.svg profile/anilist.svg profile/steam.svg profile/spotify.svg profile/game.gif" -- "$BRANCH"
+          git filter-branch -f --prune-empty --index-filter "git rm -r --cached --ignore-unmatch -- profile/user.svg profile/repositories.svg profile/gists.svg profile/languages.svg profile/wakatime.svg profile/anilist.svg profile/steam.svg profile/spotify.svg profile/game.gif" -- "$BRANCH"
 
           for file in "${FILES[@]}"; do
             if [ -f "$TMP_DIR/$file" ]; then
@@ -244,7 +259,7 @@ jobs:
             fi
           done
 
-          git add profile/user.svg profile/repositories.svg profile/languages.svg profile/wakatime.svg profile/anilist.svg profile/steam.svg profile/spotify.svg profile/game.gif || true
+          git add profile/user.svg profile/repositories.svg profile/gists.svg profile/languages.svg profile/wakatime.svg profile/anilist.svg profile/steam.svg profile/spotify.svg profile/game.gif || true
 
           if ! git diff --cached --quiet; then
             git commit -m "Compact generated profile asset history [skip ci]"
