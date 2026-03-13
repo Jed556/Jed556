@@ -10,6 +10,7 @@
 name: Profile
 on:
   schedule:
+    - cron: "*/10 * * * *"
     - cron: "0 * * * *"
   workflow_dispatch:
     inputs:
@@ -30,7 +31,7 @@ on:
       - profile/game.gif
 
 concurrency:
-  group: profile-${{ github.workflow }}-${{ github.ref }}
+  group: profile-${{ github.workflow }}-${{ github.ref }}-${{ github.event_name == 'schedule' && github.event.schedule || 'manual-or-push' }}
   cancel-in-progress: true
 
 jobs:
@@ -42,7 +43,7 @@ jobs:
       contents: write
     steps:
       - name: User
-        if: ${{ github.event_name != 'workflow_dispatch' || inputs.run == 'all' || contains(inputs.run, 'user') }}
+        if: ${{ (github.event_name != 'workflow_dispatch' || inputs.run == 'all' || contains(inputs.run, 'user')) && (github.event_name != 'schedule' || github.event.schedule == '0 * * * *') }}
         continue-on-error: true
         uses: lowlighter/metrics@latest
         with:
@@ -55,7 +56,7 @@ jobs:
           config_timezone: Asia/Manila
 
       - name: Repositories
-        if: ${{ github.event_name != 'workflow_dispatch' || inputs.run == 'all' || contains(inputs.run, 'repositories') }}
+        if: ${{ (github.event_name != 'workflow_dispatch' || inputs.run == 'all' || contains(inputs.run, 'repositories')) && (github.event_name != 'schedule' || github.event.schedule == '0 * * * *') }}
         continue-on-error: true
         uses: lowlighter/metrics@latest
         with:
@@ -69,7 +70,7 @@ jobs:
           repositories_forks: yes
 
       - name: Languages
-        if: ${{ github.event_name != 'workflow_dispatch' || inputs.run == 'all' || contains(inputs.run, 'languages') }}
+        if: ${{ (github.event_name != 'workflow_dispatch' || inputs.run == 'all' || contains(inputs.run, 'languages')) && (github.event_name != 'schedule' || github.event.schedule == '0 * * * *') }}
         continue-on-error: true
         uses: lowlighter/metrics@latest
         with:
@@ -95,7 +96,7 @@ jobs:
           plugin_languages_threshold: 0%
 
       - name: WakaTime
-        if: ${{ github.event_name != 'workflow_dispatch' || inputs.run == 'all' || contains(inputs.run, 'wakatime') }}
+        if: ${{ (github.event_name != 'workflow_dispatch' || inputs.run == 'all' || contains(inputs.run, 'wakatime')) && (github.event_name != 'schedule' || github.event.schedule == '0 * * * *') }}
         continue-on-error: true
         uses: lowlighter/metrics@latest
         with:
@@ -113,7 +114,7 @@ jobs:
           plugin_wakatime_user: current
 
       - name: AniList
-        if: ${{ github.event_name != 'workflow_dispatch' || inputs.run == 'all' || contains(inputs.run, 'anilist') }}
+        if: ${{ (github.event_name != 'workflow_dispatch' || inputs.run == 'all' || contains(inputs.run, 'anilist')) && (github.event_name != 'schedule' || github.event.schedule == '0 * * * *') }}
         continue-on-error: true
         uses: lowlighter/metrics@latest
         with:
@@ -131,7 +132,7 @@ jobs:
           plugin_anilist_user: Jed556
 
       - name: Steam
-        if: ${{ github.event_name != 'workflow_dispatch' || inputs.run == 'all' || contains(inputs.run, 'steam') }}
+        if: ${{ (github.event_name != 'workflow_dispatch' || inputs.run == 'all' || contains(inputs.run, 'steam')) && (github.event_name != 'schedule' || github.event.schedule == '0 * * * *') }}
         continue-on-error: true
         uses: lowlighter/metrics@latest
         with:
@@ -149,7 +150,7 @@ jobs:
           plugin_steam_user: '76561198429674322'
 
       - name: Spotify
-        if: ${{ github.event_name != 'workflow_dispatch' || inputs.run == 'all' || contains(inputs.run, 'spotify') }}
+        if: ${{ (github.event_name != 'workflow_dispatch' || inputs.run == 'all' || contains(inputs.run, 'spotify')) && (github.event_name != 'schedule' || github.event.schedule == '*/10 * * * *') }}
         continue-on-error: true
         uses: lowlighter/metrics@latest
         with:
@@ -170,7 +171,7 @@ jobs:
 
   New_Game:
     needs: [Metrics]
-    if: ${{ always() && !cancelled() && (github.event_name != 'workflow_dispatch' || inputs.run == 'all' || contains(inputs.run, 'new_game')) }}
+    if: ${{ always() && !cancelled() && (github.event_name != 'workflow_dispatch' || inputs.run == 'all' || contains(inputs.run, 'new_game')) && (github.event_name != 'schedule' || github.event.schedule == '0 * * * *') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
