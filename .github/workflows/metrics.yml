@@ -22,15 +22,7 @@ on:
   push:
     branches: ["Jed"]
     paths-ignore:
-      - profile/user.svg
-      - profile/repositories.svg
-      - profile/gists.svg
-      - profile/languages.svg
-      - profile/wakatime.svg
-      - profile/anilist.svg
-      - profile/steam.svg
-      - profile/spotify.svg
-      - profile/game.gif
+      - profile/**
 
 concurrency:
   group: profile-${{ github.workflow }}-${{ github.ref }}-${{ github.event_name == 'schedule' && github.event.schedule || 'manual-or-push' }}
@@ -249,17 +241,8 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
           BRANCH="${GITHUB_REF_NAME}"
-          FILES=(
-            profile/user.svg
-            profile/repositories.svg
-            profile/gists.svg
-            profile/languages.svg
-            profile/wakatime.svg
-            profile/anilist.svg
-            profile/steam.svg
-            profile/spotify.svg
-            profile/game.gif
-          )
+          shopt -s nullglob
+          FILES=(profile/*)
 
           TMP_DIR="$(mktemp -d)"
           for file in "${FILES[@]}"; do
@@ -269,7 +252,9 @@ jobs:
             fi
           done
 
-          git filter-branch -f --prune-empty --index-filter "git rm -r --cached --ignore-unmatch -- profile/user.svg profile/repositories.svg profile/gists.svg profile/languages.svg profile/wakatime.svg profile/anilist.svg profile/steam.svg profile/spotify.svg profile/game.gif" -- "$BRANCH"
+          INDEX_FILTER_CMD='git rm -r --cached --ignore-unmatch -- profile/*'
+
+          git filter-branch -f --prune-empty --index-filter "$INDEX_FILTER_CMD" -- "$BRANCH"
 
           for file in "${FILES[@]}"; do
             if [ -f "$TMP_DIR/$file" ]; then
@@ -278,7 +263,11 @@ jobs:
             fi
           done
 
-          git add profile/user.svg profile/repositories.svg profile/gists.svg profile/languages.svg profile/wakatime.svg profile/anilist.svg profile/steam.svg profile/spotify.svg profile/game.gif || true
+          for file in "${FILES[@]}"; do
+            if [ -f "$file" ]; then
+              git add -- "$file"
+            fi
+          done
 
           if ! git diff --cached --quiet; then
             git commit -m "Compact generated profile asset history [skip ci]"
