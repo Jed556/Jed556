@@ -11,6 +11,7 @@ name: Profile
 on:
   schedule:
     - cron: "*/10 * * * *"
+    - cron: "0 */4 * * *"
     - cron: "0 * * * *"
   workflow_dispatch:
     inputs:
@@ -44,7 +45,7 @@ jobs:
       contents: write
     steps:
       - name: User
-        if: ${{ (github.event_name != 'workflow_dispatch' || inputs.run == 'all' || contains(inputs.run, 'user')) && (github.event_name != 'schedule' || github.event.schedule == '0 * * * *') }}
+        if: ${{ (github.event_name != 'workflow_dispatch' || inputs.run == 'all' || contains(inputs.run, 'user')) && (github.event_name != 'schedule' || github.event.schedule == '0 */4 * * *') }}
         continue-on-error: true
         uses: lowlighter/metrics@latest
         with:
@@ -57,7 +58,7 @@ jobs:
           config_timezone: Asia/Manila
 
       - name: Repositories
-        if: ${{ (github.event_name != 'workflow_dispatch' || inputs.run == 'all' || contains(inputs.run, 'repositories')) && (github.event_name != 'schedule' || github.event.schedule == '0 * * * *') }}
+        if: ${{ (github.event_name != 'workflow_dispatch' || inputs.run == 'all' || contains(inputs.run, 'repositories')) && (github.event_name != 'schedule' || github.event.schedule == '0 */4 * * *') }}
         continue-on-error: true
         uses: lowlighter/metrics@latest
         with:
@@ -71,7 +72,7 @@ jobs:
           repositories_forks: yes
 
       - name: Gists
-        if: ${{ (github.event_name != 'workflow_dispatch' || inputs.run == 'all' || contains(inputs.run, 'gists')) && (github.event_name != 'schedule' || github.event.schedule == '0 * * * *') }}
+        if: ${{ (github.event_name != 'workflow_dispatch' || inputs.run == 'all' || contains(inputs.run, 'gists')) && (github.event_name != 'schedule' || github.event.schedule == '0 */4 * * *') }}
         continue-on-error: true
         uses: lowlighter/metrics@latest
         with:
@@ -81,7 +82,7 @@ jobs:
           plugin_gists: yes
 
       - name: Languages
-        if: ${{ (github.event_name != 'workflow_dispatch' || inputs.run == 'all' || contains(inputs.run, 'languages')) && (github.event_name != 'schedule' || github.event.schedule == '0 * * * *') }}
+        if: ${{ (github.event_name != 'workflow_dispatch' || inputs.run == 'all' || contains(inputs.run, 'languages')) && (github.event_name != 'schedule' || github.event.schedule == '0 */4 * * *') }}
         continue-on-error: true
         uses: lowlighter/metrics@latest
         with:
@@ -110,7 +111,7 @@ jobs:
           plugin_languages_threshold: 0%
 
       - name: WakaTime
-        if: ${{ (github.event_name != 'workflow_dispatch' || inputs.run == 'all' || contains(inputs.run, 'wakatime')) && (github.event_name != 'schedule' || github.event.schedule == '0 * * * *') }}
+        if: ${{ (github.event_name != 'workflow_dispatch' || inputs.run == 'all' || contains(inputs.run, 'wakatime')) && (github.event_name != 'schedule' || github.event.schedule == '0 */4 * * *') }}
         continue-on-error: true
         uses: lowlighter/metrics@latest
         with:
