@@ -187,7 +187,7 @@ jobs:
           git reset --hard "origin/${GITHUB_REF_NAME}"
 
       - name: Generate Space Shooter
-        uses: czl9707/gh-space-shooter@v1
+        uses: czl9707/gh-space-shooter@v2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           output-path: 'profile/game.gif'
