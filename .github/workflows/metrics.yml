@@ -13,6 +13,7 @@ on:
     - cron: "*/10 * * * *"
     - cron: "0 */4 * * *"
     - cron: "0 * * * *"
+    - cron: "0 3 * * 0"
   workflow_dispatch:
     inputs:
       run:
@@ -274,3 +275,64 @@ jobs:
           fi
 
           git push --force-with-lease origin "$BRANCH"
+
+  Cleanup_Old_Runs:
+    if: ${{ github.event_name == 'schedule' && github.event.schedule == '0 3 * * 0' }}
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - name: Delete old Profile workflow runs
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const workflowName = 'Profile';
+            const retainDays = 7;
+            const cutoffDate = new Date(Date.now() - retainDays * 24 * 60 * 60 * 1000);
+
+            const workflows = await github.paginate(
+              github.rest.actions.listRepoWorkflows,
+              {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                per_page: 100
+              }
+            );
+
+            const targetWorkflow = workflows.find((wf) => wf.name === workflowName);
+            if (!targetWorkflow) {
+              core.setFailed(`Workflow "${workflowName}" was not found.`);
+              return;
+            }
+
+            const runs = await github.paginate(
+              github.rest.actions.listWorkflowRuns,
+              {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                workflow_id: targetWorkflow.id,
+                status: 'completed',
+                per_page: 100
+              }
+            );
+
+            let deletedCount = 0;
+            let retainedCount = 0;
+
+            for (const run of runs) {
+              const createdAt = new Date(run.created_at);
+              if (createdAt >= cutoffDate) {
+                retainedCount += 1;
+                continue;
+              }
+
+              await github.rest.actions.deleteWorkflowRun({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                run_id: run.id
+              });
+              deletedCount += 1;
+            }
+
+            console.log(`Deleted ${deletedCount} run(s) older than ${retainDays} day(s) for workflow "${workflowName}".`);
+            console.log(`Retained ${retainedCount} newer run(s).`);
