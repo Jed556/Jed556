@@ -22,8 +22,8 @@ on:
         default: "all"
   push:
     branches: ["Jed"]
-    paths-ignore:
-      - profile/**
+    paths:
+      - .github/workflows/metrics.yml
 
 concurrency:
   group: profile-${{ github.workflow }}-${{ github.ref }}
