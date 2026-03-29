@@ -1,30 +1,15 @@
-name: Dependabot auto-approve
+name: Dependabot Auto-Merge
 on:
-  pull_request_target:
+  pull_request:
     types: [opened, reopened, synchronize]
 
 permissions:
   pull-requests: write
+  contents: write
 
 jobs:
-  approve:
+  Resolve_Conflicts:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.user.login == 'dependabot[bot]' && github.repository == 'Jed556/Jed556'
-    steps:
-      - name: Dependabot metadata
-        id: metadata
-        uses: dependabot/fetch-metadata@ffa630c65fa7e0ecfa0625b5ceda64399aea1b36
-        with:
-          github-token: "${{ secrets.GITHUB_TOKEN }}"
-      - name: Approve a PR
-        run: gh pr review --approve "$PR_URL"
-        env:
-          PR_URL: ${{github.event.pull_request.html_url}}
-          GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
-
-  resolve_conflicts:
-    runs-on: ubuntu-latest
-    needs: [approve]
     if: github.event.pull_request.user.login == 'dependabot[bot]' && github.repository == 'Jed556/Jed556' && github.event.pull_request.head.repo.full_name == github.repository
     permissions:
       contents: write
@@ -86,3 +71,43 @@ jobs:
           fi
 
           git push origin "HEAD:${HEAD_REF}"
+
+  Approve:
+    runs-on: ubuntu-latest
+    needs: [Resolve_Conflicts]
+    if: github.event.pull_request.user.login == 'dependabot[bot]' && github.repository == 'Jed556/Jed556' && (needs.Resolve_Conflicts.result == 'success' || needs.Resolve_Conflicts.result == 'skipped')
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Approve a PR if not already approved
+        run: |
+          gh pr checkout "$PR_URL" # Sets upstream metadata for gh pr status.
+          if [ "$(gh pr status --json reviewDecision -q .currentBranch.reviewDecision)" != "APPROVED" ]; then
+            gh pr review --approve "$PR_URL"
+          else
+            echo "PR already approved, skipping additional approvals."
+          fi
+        env:
+          PR_URL: ${{github.event.pull_request.html_url}}
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
+  Merge:
+    runs-on: ubuntu-latest
+    needs: [Approve]
+    if: github.event.pull_request.user.login == 'dependabot[bot]' && github.repository == 'Jed556/Jed556' && needs.Approve.result == 'success'
+    steps:
+      - name: Dependabot metadata
+        id: dependabot-metadata
+        uses: dependabot/fetch-metadata@v2
+
+      - name: Enable auto-merge for patch updates
+        if: ${{ steps.dependabot-metadata.outputs.update-type == 'version-update:semver-patch' }}
+        run: |
+          if [ "$(gh pr view "$PR_URL" --json autoMergeRequest -q '.autoMergeRequest != null')" = "true" ]; then
+            echo "Auto-merge is already enabled."
+          else
+            gh pr merge --auto --merge "$PR_URL"
+          fi
+        env:
+          PR_URL: ${{github.event.pull_request.html_url}}
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
