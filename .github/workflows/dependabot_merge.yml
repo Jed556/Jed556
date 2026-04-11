@@ -87,22 +87,13 @@
                 exit 1
               fi
   
-              for file in "${conflict_files[@]}"; do
-                if [[ ! "$file" =~ ^profile/.*\.(svg|gif)$ ]]; then
-                  echo "Found disallowed conflicted file: $file"
-                  echo "Only profile/*.svg and profile/*.gif conflicts are auto-resolved."
-                  git merge --abort || true
-                  exit 1
-                fi
-              done
-  
-              # Keep the base branch version for generated profile assets.
+              # Prefer the default branch version for every conflicted file.
               for file in "${conflict_files[@]}"; do
                 git checkout --theirs -- "$file"
                 git add "$file"
               done
   
-              git commit -m "chore: auto-resolve profile asset conflicts for dependabot PR #${PR_NUMBER}"
+              git commit -m "chore: auto-resolve conflicts from ${BASE_REF} for dependabot PR #${PR_NUMBER}"
             fi
   
             git push origin "HEAD:${HEAD_REF}"
@@ -240,45 +231,11 @@
           id: dependabot-metadata
           uses: dependabot/fetch-metadata@v2
   
-        - name: Squash merge patch Dependabot PR
-          if: github.event_name == 'pull_request' && steps.dependabot-metadata.outputs.update-type == 'version-update:semver-patch'
+        - name: Squash merge Dependabot PRs
           shell: bash
           env:
             PR_URL: ${{github.event.pull_request.html_url}}
-            GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
-            CUSTOM_GH_TOKEN: ${{ secrets['DEPENDABOT_AUTOMERGE_TOKEN'] }}
-          run: |
-            set -euo pipefail
-  
-            if [ -n "${CUSTOM_GH_TOKEN}" ]; then
-              GH_TOKEN="${CUSTOM_GH_TOKEN}"
-              export GH_TOKEN
-              echo "Using DEPENDABOT_AUTOMERGE_TOKEN for gh commands."
-            else
-              echo "Using default GITHUB_TOKEN for gh commands."
-            fi
-
-            set +e
-            merge_output="$(gh pr merge --squash "$PR_URL" 2>&1)"
-            merge_status=$?
-            set -e
-
-            if [ "$merge_status" -eq 0 ]; then
-              echo "$merge_output"
-            elif echo "$merge_output" | grep -Fq "without \`workflows\` permission"; then
-              echo "$merge_output"
-              echo "Skipping squash merge for workflow-file PR due to missing workflows permission."
-            elif echo "$merge_output" | grep -Fq "already merged"; then
-              echo "PR is already merged."
-            else
-              echo "$merge_output"
-              exit "$merge_status"
-            fi
-
-        - name: Squash merge open Dependabot PRs after Profile
-          if: github.event_name == 'workflow_run'
-          shell: bash
-          env:
+            UPDATE_TYPE: ${{ steps.dependabot-metadata.outputs.update-type }}
             GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
             CUSTOM_GH_TOKEN: ${{ secrets['DEPENDABOT_AUTOMERGE_TOKEN'] }}
             DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
@@ -293,12 +250,23 @@
               echo "Using default GITHUB_TOKEN for gh commands."
             fi
 
-            mapfile -t pr_urls < <(gh pr list \
-              --repo "${GITHUB_REPOSITORY}" \
-              --state open \
-              --search "author:app/dependabot base:${DEFAULT_BRANCH}" \
-              --json url,isCrossRepository \
-              --jq '.[] | select(.isCrossRepository == false) | .url')
+            declare -a pr_urls=()
+
+            if [ "${GITHUB_EVENT_NAME}" = "pull_request" ]; then
+              if [ "${UPDATE_TYPE}" != "version-update:semver-patch" ]; then
+                echo "Skipping merge because update type is '${UPDATE_TYPE}' (only patch updates are merged on pull_request events)."
+                exit 0
+              fi
+
+              pr_urls+=("${PR_URL}")
+            else
+              mapfile -t pr_urls < <(gh pr list \
+                --repo "${GITHUB_REPOSITORY}" \
+                --state open \
+                --search "author:app/dependabot base:${DEFAULT_BRANCH}" \
+                --json url,isCrossRepository \
+                --jq '.[] | select(.isCrossRepository == false) | .url')
+            fi
 
             if [ "${#pr_urls[@]}" -eq 0 ]; then
               echo "No PRs to squash merge."
