@@ -49,7 +49,7 @@ jobs:
     if: ${{ github.event.inputs.cleanup_artifacts == 'true' }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/github-script@v8
+      - uses: actions/github-script@v9
         with:
           script: |
             const artifacts = await github.paginate(
@@ -78,7 +78,7 @@ jobs:
     if: ${{ github.event.inputs.cleanup_workflow_runs == 'true' }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/github-script@v8
+      - uses: actions/github-script@v9
         env:
           TARGET_WORKFLOW_NAME: ${{ github.event.inputs.workflow_name }}
         with:
