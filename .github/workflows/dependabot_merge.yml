@@ -240,31 +240,86 @@
           id: dependabot-metadata
           uses: dependabot/fetch-metadata@v2
   
-        - name: Enable auto-merge for patch updates
-          if: ${{ steps.dependabot-metadata.outputs.update-type == 'version-update:semver-patch' }}
+        - name: Squash merge patch Dependabot PR
+          if: github.event_name == 'pull_request' && steps.dependabot-metadata.outputs.update-type == 'version-update:semver-patch'
+          shell: bash
+          env:
+            PR_URL: ${{github.event.pull_request.html_url}}
+            GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+            CUSTOM_GH_TOKEN: ${{ secrets['DEPENDABOT_AUTOMERGE_TOKEN'] }}
           run: |
             set -euo pipefail
   
-            if [ "$(gh pr view "$PR_URL" --json autoMergeRequest -q '.autoMergeRequest != null')" = "true" ]; then
-              echo "Auto-merge is already enabled."
+            if [ -n "${CUSTOM_GH_TOKEN}" ]; then
+              GH_TOKEN="${CUSTOM_GH_TOKEN}"
+              export GH_TOKEN
+              echo "Using DEPENDABOT_AUTOMERGE_TOKEN for gh commands."
             else
+              echo "Using default GITHUB_TOKEN for gh commands."
+            fi
+
+            set +e
+            merge_output="$(gh pr merge --squash "$PR_URL" 2>&1)"
+            merge_status=$?
+            set -e
+
+            if [ "$merge_status" -eq 0 ]; then
+              echo "$merge_output"
+            elif echo "$merge_output" | grep -Fq "without \`workflows\` permission"; then
+              echo "$merge_output"
+              echo "Skipping squash merge for workflow-file PR due to missing workflows permission."
+            elif echo "$merge_output" | grep -Fq "already merged"; then
+              echo "PR is already merged."
+            else
+              echo "$merge_output"
+              exit "$merge_status"
+            fi
+
+        - name: Squash merge open Dependabot PRs after Profile
+          if: github.event_name == 'workflow_run'
+          shell: bash
+          env:
+            GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+            CUSTOM_GH_TOKEN: ${{ secrets['DEPENDABOT_AUTOMERGE_TOKEN'] }}
+            DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          run: |
+            set -euo pipefail
+
+            if [ -n "${CUSTOM_GH_TOKEN}" ]; then
+              GH_TOKEN="${CUSTOM_GH_TOKEN}"
+              export GH_TOKEN
+              echo "Using DEPENDABOT_AUTOMERGE_TOKEN for gh commands."
+            else
+              echo "Using default GITHUB_TOKEN for gh commands."
+            fi
+
+            mapfile -t pr_urls < <(gh pr list \
+              --repo "${GITHUB_REPOSITORY}" \
+              --state open \
+              --search "author:app/dependabot base:${DEFAULT_BRANCH}" \
+              --json url,isCrossRepository \
+              --jq '.[] | select(.isCrossRepository == false) | .url')
+
+            if [ "${#pr_urls[@]}" -eq 0 ]; then
+              echo "No PRs to squash merge."
+              exit 0
+            fi
+
+            for pr_url in "${pr_urls[@]}"; do
               set +e
-              merge_output="$(gh pr merge --auto --squash "$PR_URL" 2>&1)"
+              merge_output="$(gh pr merge --squash "${pr_url}" 2>&1)"
               merge_status=$?
               set -e
   
               if [ "$merge_status" -eq 0 ]; then
                 echo "$merge_output"
-              elif echo "$merge_output" | grep -Fq "in clean status"; then
+              elif echo "$merge_output" | grep -Fq "without \`workflows\` permission"; then
                 echo "$merge_output"
-                echo "PR is already clean; merging immediately with squash."
-                gh pr merge --squash "$PR_URL"
+                echo "Skipping ${pr_url} due to missing workflows permission for workflow-file changes."
+              elif echo "$merge_output" | grep -Fq "already merged"; then
+                echo "PR already merged: ${pr_url}"
               else
                 echo "$merge_output"
                 exit "$merge_status"
               fi
-            fi
-          env:
-            PR_URL: ${{github.event.pull_request.html_url}}
-            GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-  
+            done
