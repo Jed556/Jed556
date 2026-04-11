@@ -163,8 +163,9 @@ jobs:
           plugin_steam_games_limit: 1
           plugin_steam_recent_games_limit: 1
           plugin_steam_achievements_limit: 1
+          plugin_steam_playtime_threshold: 0
           plugin_steam_sections: player, most-played, recently-played
-          plugin_steam_user: '76561198429674322'
+          plugin_steam_user: ${{ secrets.STEAM_USER_ID }}
 
           # STYLE
           extras_css: |
