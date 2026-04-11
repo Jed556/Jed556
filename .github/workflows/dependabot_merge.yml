@@ -1,113 +1,270 @@
-name: Dependabot Auto-Merge
-on:
-  pull_request:
-    types: [opened, reopened, synchronize]
-
-permissions:
-  pull-requests: write
-  contents: write
-
-jobs:
-  Resolve_Conflicts:
-    runs-on: ubuntu-latest
-    if: github.event.pull_request.user.login == 'dependabot[bot]' && github.repository == 'Jed556/Jed556' && github.event.pull_request.head.repo.full_name == github.repository
-    permissions:
-      contents: write
-      pull-requests: write
-    steps:
-      - name: Checkout PR head
-        uses: actions/checkout@v6
-        with:
-          ref: ${{ github.event.pull_request.head.ref }}
-          repository: ${{ github.event.pull_request.head.repo.full_name }}
-          fetch-depth: 0
-
-      - name: Merge base and resolve allowed conflicts
-        shell: bash
-        env:
-          BASE_REF: ${{ github.event.pull_request.base.ref }}
-          HEAD_REF: ${{ github.event.pull_request.head.ref }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-        run: |
-          set -euo pipefail
-
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-          git fetch origin "${BASE_REF}" "${HEAD_REF}"
-          git checkout "${HEAD_REF}"
-
-          set +e
-          git merge --no-edit "origin/${BASE_REF}"
-          merge_exit=$?
-          set -e
-
-          if [ "$merge_exit" -eq 0 ]; then
-            echo "Base merged cleanly or branch already up to date."
-          else
-            mapfile -t conflict_files < <(git diff --name-only --diff-filter=U)
-
-            if [ "${#conflict_files[@]}" -eq 0 ]; then
-              echo "Merge failed but no conflicted files were detected."
-              exit 1
-            fi
-
-            for file in "${conflict_files[@]}"; do
-              if [[ ! "$file" =~ ^profile/.*\.(svg|gif)$ ]]; then
-                echo "Found disallowed conflicted file: $file"
-                echo "Only profile/*.svg and profile/*.gif conflicts are auto-resolved."
-                git merge --abort || true
+# Setup instructions:
+  # 1) Required workflow/job permissions in this file:
+  #    - pull-requests: write
+  #    - contents: write
+  # 2) Optional repository secret for workflow-file PR auto-merge:
+  #    - DEPENDABOT_AUTOMERGE_TOKEN
+  #      Classic PAT scopes: repo, workflow.
+  #      Fine-grained PAT repo permissions: Pull requests (Read and write),
+  #      Contents (Read and write), Workflows (Read and write).
+  # 3) Token selection used by gh commands:
+  #    - If DEPENDABOT_AUTOMERGE_TOKEN is set, steps use it.
+  #    - Otherwise steps use the default Actions GITHUB_TOKEN.
+  # 4) Why the optional token matters:
+  #    - PRs that modify .github/workflows/* may fail merge/auto-merge without
+  #      workflows-capable token permissions.
+    
+  name: Dependabot Auto-Merge
+  on:
+    pull_request:
+      types: [opened, reopened, synchronize]
+    workflow_run:
+      workflows: [Profile]
+      types: [completed]
+  
+  permissions:
+    pull-requests: write
+    contents: write
+  
+  jobs:
+    Resolve:
+      runs-on: ubuntu-latest
+      if: >
+        github.repository == 'Jed556/Jed556' &&
+        (
+          (
+            github.event_name == 'pull_request' &&
+            github.event.pull_request.user.login == 'dependabot[bot]' &&
+            github.event.pull_request.head.repo.full_name == github.repository
+          ) ||
+          (
+            github.event_name == 'workflow_run' &&
+            github.event.workflow_run.conclusion == 'success' &&
+            github.event.workflow_run.head_repository.full_name == github.repository &&
+            github.event.workflow_run.head_branch == github.event.repository.default_branch
+          )
+        )
+      permissions:
+        contents: write
+        pull-requests: write
+      steps:
+        - name: Checkout PR head
+          if: github.event_name == 'pull_request'
+          uses: actions/checkout@v6
+          with:
+            ref: ${{ github.event.pull_request.head.ref }}
+            repository: ${{ github.event.pull_request.head.repo.full_name }}
+            fetch-depth: 0
+  
+        - name: Resolve conflicts for the triggering Dependabot PR
+          if: github.event_name == 'pull_request'
+          shell: bash
+          env:
+            BASE_REF: ${{ github.event.pull_request.base.ref }}
+            HEAD_REF: ${{ github.event.pull_request.head.ref }}
+            PR_NUMBER: ${{ github.event.pull_request.number }}
+          run: |
+            set -euo pipefail
+  
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+  
+            git fetch origin "${BASE_REF}" "${HEAD_REF}"
+            git checkout "${HEAD_REF}"
+  
+            set +e
+            git merge --no-edit "origin/${BASE_REF}"
+            merge_exit=$?
+            set -e
+  
+            if [ "$merge_exit" -eq 0 ]; then
+              echo "Base merged cleanly or branch already up to date."
+            else
+              mapfile -t conflict_files < <(git diff --name-only --diff-filter=U)
+  
+              if [ "${#conflict_files[@]}" -eq 0 ]; then
+                echo "Merge failed but no conflicted files were detected."
                 exit 1
               fi
+  
+              for file in "${conflict_files[@]}"; do
+                if [[ ! "$file" =~ ^profile/.*\.(svg|gif)$ ]]; then
+                  echo "Found disallowed conflicted file: $file"
+                  echo "Only profile/*.svg and profile/*.gif conflicts are auto-resolved."
+                  git merge --abort || true
+                  exit 1
+                fi
+              done
+  
+              # Keep the base branch version for generated profile assets.
+              for file in "${conflict_files[@]}"; do
+                git checkout --theirs -- "$file"
+                git add "$file"
+              done
+  
+              git commit -m "chore: auto-resolve profile asset conflicts for dependabot PR #${PR_NUMBER}"
+            fi
+  
+            git push origin "HEAD:${HEAD_REF}"
+  
+        - name: Checkout repository
+          if: github.event_name == 'workflow_run'
+          uses: actions/checkout@v6
+          with:
+            ref: ${{ github.event.repository.default_branch }}
+            fetch-depth: 0
+  
+        - name: Sync profile assets for open Dependabot PRs
+          if: github.event_name == 'workflow_run'
+          shell: bash
+          env:
+            GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            CUSTOM_GH_TOKEN: ${{ secrets['DEPENDABOT_AUTOMERGE_TOKEN'] }}
+            DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          run: |
+            set -euo pipefail
+  
+            if [ -n "${CUSTOM_GH_TOKEN}" ]; then
+              GH_TOKEN="${CUSTOM_GH_TOKEN}"
+              export GH_TOKEN
+              echo "Using DEPENDABOT_AUTOMERGE_TOKEN for gh commands."
+            else
+              echo "Using default GITHUB_TOKEN for gh commands."
+            fi
+  
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+  
+            mapfile -t prs < <(gh pr list \
+              --repo "${GITHUB_REPOSITORY}" \
+              --state open \
+              --search "author:app/dependabot base:${DEFAULT_BRANCH}" \
+              --json number,headRefName,baseRefName,isCrossRepository \
+              --jq '.[] | select(.isCrossRepository == false) | "\(.number)|\(.headRefName)|\(.baseRefName)"')
+  
+            if [ "${#prs[@]}" -eq 0 ]; then
+              echo "No open same-repo dependabot PRs targeting ${DEFAULT_BRANCH}."
+              exit 0
+            fi
+  
+            for pr in "${prs[@]}"; do
+              IFS='|' read -r pr_number head_ref base_ref <<< "${pr}"
+              echo "Processing dependabot PR #${pr_number} (${head_ref} <- ${base_ref})"
+  
+              git fetch origin "${base_ref}" "${head_ref}"
+              git checkout -B "${head_ref}" "origin/${head_ref}"
+  
+              # Sync generated profile assets from base without merging workflow files.
+              mapfile -t profile_files < <(git diff --name-only --diff-filter=ACMRT "origin/${head_ref}..origin/${base_ref}" -- 'profile/*.svg' 'profile/*.gif')
+  
+              if [ "${#profile_files[@]}" -eq 0 ]; then
+                echo "No profile asset updates to sync for PR #${pr_number}."
+                continue
+              fi
+  
+              for file in "${profile_files[@]}"; do
+                git checkout "origin/${base_ref}" -- "${file}"
+                git add "${file}"
+              done
+  
+              if git diff --cached --quiet; then
+                echo "Profile assets already match base for PR #${pr_number}."
+                continue
+              fi
+  
+              git commit -m "chore: sync profile assets from ${base_ref} for dependabot PR #${pr_number}"
+              git push origin "HEAD:${head_ref}"
             done
-
-            # Keep the base branch version for generated profile assets.
-            for file in "${conflict_files[@]}"; do
-              git checkout --theirs -- "$file"
-              git add "$file"
+  
+    Approve:
+      runs-on: ubuntu-latest
+      needs: [Resolve]
+      if: needs.Resolve.result == 'success'
+      permissions:
+        pull-requests: write
+      steps:
+        - name: Approve Dependabot PRs
+          shell: bash
+          env:
+            GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            CUSTOM_GH_TOKEN: ${{ secrets['DEPENDABOT_AUTOMERGE_TOKEN'] }}
+            DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+            PR_URL: ${{ github.event.pull_request.html_url }}
+          run: |
+            set -euo pipefail
+  
+            if [ -n "${CUSTOM_GH_TOKEN}" ]; then
+              GH_TOKEN="${CUSTOM_GH_TOKEN}"
+              export GH_TOKEN
+              echo "Using DEPENDABOT_AUTOMERGE_TOKEN for gh commands."
+            else
+              echo "Using default GITHUB_TOKEN for gh commands."
+            fi
+  
+            declare -a pr_urls=()
+  
+            if [ "${GITHUB_EVENT_NAME}" = "pull_request" ]; then
+              pr_urls+=("${PR_URL}")
+            else
+              mapfile -t pr_urls < <(gh pr list \
+                --repo "${GITHUB_REPOSITORY}" \
+                --state open \
+                --search "author:app/dependabot base:${DEFAULT_BRANCH}" \
+                --json url,isCrossRepository \
+                --jq '.[] | select(.isCrossRepository == false) | .url')
+            fi
+  
+            if [ "${#pr_urls[@]}" -eq 0 ]; then
+              echo "No PRs to approve."
+              exit 0
+            fi
+  
+            for pr_url in "${pr_urls[@]}"; do
+              if [ "$(gh pr view "${pr_url}" --json reviewDecision -q '.reviewDecision')" != "APPROVED" ]; then
+                gh pr review --approve "${pr_url}"
+              else
+                echo "PR already approved: ${pr_url}"
+              fi
             done
-
-            git commit -m "chore: auto-resolve profile asset conflicts for dependabot PR #${PR_NUMBER}"
-          fi
-
-          git push origin "HEAD:${HEAD_REF}"
-
-  Approve:
-    runs-on: ubuntu-latest
-    needs: [Resolve_Conflicts]
-    if: github.event.pull_request.user.login == 'dependabot[bot]' && github.repository == 'Jed556/Jed556' && (needs.Resolve_Conflicts.result == 'success' || needs.Resolve_Conflicts.result == 'skipped')
-    steps:
-      - uses: actions/checkout@v6
-
-      - name: Approve a PR if not already approved
-        run: |
-          gh pr checkout "$PR_URL" # Sets upstream metadata for gh pr status.
-          if [ "$(gh pr status --json reviewDecision -q .currentBranch.reviewDecision)" != "APPROVED" ]; then
-            gh pr review --approve "$PR_URL"
-          else
-            echo "PR already approved, skipping additional approvals."
-          fi
-        env:
-          PR_URL: ${{github.event.pull_request.html_url}}
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-
-  Merge:
-    runs-on: ubuntu-latest
-    needs: [Approve]
-    if: github.event.pull_request.user.login == 'dependabot[bot]' && github.repository == 'Jed556/Jed556' && needs.Approve.result == 'success'
-    steps:
-      - name: Dependabot metadata
-        id: dependabot-metadata
-        uses: dependabot/fetch-metadata@v2
-
-      - name: Enable auto-merge for patch updates
-        if: ${{ steps.dependabot-metadata.outputs.update-type == 'version-update:semver-patch' }}
-        run: |
-          if [ "$(gh pr view "$PR_URL" --json autoMergeRequest -q '.autoMergeRequest != null')" = "true" ]; then
-            echo "Auto-merge is already enabled."
-          else
-            gh pr merge --auto --merge "$PR_URL"
-          fi
-        env:
-          PR_URL: ${{github.event.pull_request.html_url}}
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+  
+    Merge:
+      runs-on: ubuntu-latest
+      needs: [Approve]
+      if: needs.Approve.result == 'success'
+      permissions:
+        pull-requests: write
+        contents: write
+      steps:
+        - name: Dependabot metadata
+          if: github.event_name == 'pull_request'
+          id: dependabot-metadata
+          uses: dependabot/fetch-metadata@v2
+  
+        - name: Enable auto-merge for patch updates
+          if: ${{ steps.dependabot-metadata.outputs.update-type == 'version-update:semver-patch' }}
+          run: |
+            set -euo pipefail
+  
+            if [ "$(gh pr view "$PR_URL" --json autoMergeRequest -q '.autoMergeRequest != null')" = "true" ]; then
+              echo "Auto-merge is already enabled."
+            else
+              set +e
+              merge_output="$(gh pr merge --auto --squash "$PR_URL" 2>&1)"
+              merge_status=$?
+              set -e
+  
+              if [ "$merge_status" -eq 0 ]; then
+                echo "$merge_output"
+              elif echo "$merge_output" | grep -Fq "in clean status"; then
+                echo "$merge_output"
+                echo "PR is already clean; merging immediately with squash."
+                gh pr merge --squash "$PR_URL"
+              else
+                echo "$merge_output"
+                exit "$merge_status"
+              fi
+            fi
+          env:
+            PR_URL: ${{github.event.pull_request.html_url}}
+            GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+  
