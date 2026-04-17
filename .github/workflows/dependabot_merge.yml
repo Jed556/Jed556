@@ -210,7 +210,7 @@
         - name: Dependabot metadata
           if: github.event_name == 'pull_request'
           id: dependabot-metadata
-          uses: dependabot/fetch-metadata@v2
+          uses: dependabot/fetch-metadata@v3
   
         - name: Squash merge Dependabot PRs
           shell: bash
