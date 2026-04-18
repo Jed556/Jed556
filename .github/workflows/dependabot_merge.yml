@@ -18,8 +18,8 @@
   on:
     pull_request:
       types: [opened, reopened, synchronize]
-    push:
-      branches: [Jed]
+      # push: # Comment to avoid extensive workflow runs on pushes.
+      # branches: [Jed]
       paths-ignore:
         - 'profile/**'
     workflow_run:
