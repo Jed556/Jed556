@@ -13,10 +13,11 @@ on:
     - cron: "*/10 * * * *"
     - cron: "0 */4 * * *"
     - cron: "0 * * * *"
+    - cron: "0 3 * * *"
   workflow_dispatch:
     inputs:
       run:
-        description: "Comma-separated list of targets to execute (user,repositories,gists,languages,wakatime,anilist,steam,new_game,all)"
+        description: "Comma-separated list of targets to execute (user,repositories,gists,languages,wakatime,streak,anilist,steam,new_game,all)"
         required: true
         default: "all"
   push:
@@ -31,7 +32,7 @@ concurrency:
 jobs:
 
   Metrics:
-    if: ${{ github.event_name != 'workflow_dispatch' || inputs.run == 'all' || contains(inputs.run, 'user') || contains(inputs.run, 'repositories') || contains(inputs.run, 'languages') || contains(inputs.run, 'wakatime') || contains(inputs.run, 'anilist') || contains(inputs.run, 'steam') || contains(inputs.run, 'spotify') }}
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.run == 'all' || contains(inputs.run, 'user') || contains(inputs.run, 'repositories') || contains(inputs.run, 'languages') || contains(inputs.run, 'wakatime') || contains(inputs.run, 'streak') || contains(inputs.run, 'anilist') || contains(inputs.run, 'steam') || contains(inputs.run, 'spotify') }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -119,6 +120,45 @@ jobs:
           plugin_wakatime_sections: time, projects, projects-graphs, languages, languages-graphs, editors, os
           plugin_wakatime_token: ${{ secrets.WAKATIME_TOKEN }}
           plugin_wakatime_user: current
+
+      - name: Streak
+        if: ${{ (github.event_name == 'workflow_dispatch' && (inputs.run == 'all' || contains(inputs.run, 'streak'))) || (github.event_name == 'schedule' && github.event.schedule == '0 3 * * *') }}
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          STREAK_OPTIONS: user=Jed556&currStreakLabel=56d364&ring=56d364&fire=56d364&hide_border=true&background=77777700&dates=777777&border=777777&sideLabels=777777&currStreakNum=959da5&sideNums=959da5&stroke=777777&mode=daily
+        run: |
+          set -euo pipefail
+
+          sudo apt-get update
+          sudo apt-get install -y php-cli php-curl php-intl unzip
+
+          if ! command -v composer >/dev/null 2>&1; then
+            php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+            sudo php composer-setup.php --install-dir=/usr/local/bin --filename=composer
+            rm composer-setup.php
+          fi
+
+          git init .
+          git remote remove origin 2>/dev/null || true
+          git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git fetch --depth=1 origin "${GITHUB_REF_NAME}"
+          git checkout -B "${GITHUB_REF_NAME}" FETCH_HEAD
+
+          action_dir="$(mktemp -d)"
+          git clone --depth=1 https://github.com/DenverCoder1/github-readme-streak-stats.git "${action_dir}"
+          composer --working-dir="${action_dir}" install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+
+          INPUT_OPTIONS="${STREAK_OPTIONS}" \
+          INPUT_PATH="profile/streak.svg" \
+          TOKEN="${GH_TOKEN}" \
+            php "${action_dir}/bin/generate-card.php"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add profile/streak.svg
+          git commit -m "Update streak stats" || exit 0
+          git push
 
       - name: AniList
         if: ${{ (github.event_name != 'workflow_dispatch' || inputs.run == 'all' || contains(inputs.run, 'anilist')) && (github.event_name != 'schedule' || github.event.schedule == '0 * * * *') }}
