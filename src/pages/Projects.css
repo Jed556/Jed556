@@ -1,0 +1,53 @@
+.projects-container {
+  min-height: 100vh;
+  background-color: var(--zzz-black);
+}
+
+.projects-content {
+  padding: 6rem 2rem;
+  position: relative;
+}
+
+.projects-header {
+  text-align: center;
+  margin-bottom: 4rem;
+}
+
+.projects-title {
+  font-size: 4rem;
+  color: var(--zzz-white);
+}
+
+.loading-state,
+.error-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50vh;
+  font-family: var(--font-mono);
+  font-size: 1.5rem;
+  color: var(--zzz-accent);
+}
+
+.error-state {
+  color: red;
+}
+
+.projects-grid-wrapper {
+  transition: opacity 0.3s ease;
+}
+
+.projects-grid-wrapper.faded {
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+.section-index {
+  position: absolute;
+  top: 40px;
+  right: 40px;
+  font-family: var(--font-mono);
+  color: var(--zzz-white);
+  font-size: 1.5rem;
+  opacity: 0.5;
+}

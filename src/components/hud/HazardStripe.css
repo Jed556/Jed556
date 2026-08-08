@@ -1,0 +1,10 @@
+.hazard-stripe {
+  width: 100%;
+  background: repeating-linear-gradient(
+    45deg,
+    var(--zzz-accent),
+    var(--zzz-accent) 10px,
+    var(--zzz-black) 10px,
+    var(--zzz-black) 20px
+  );
+}

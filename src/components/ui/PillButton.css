@@ -1,0 +1,110 @@
+.pill-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-decoration: none;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  background: transparent;
+  border: none;
+  z-index: 1;
+}
+
+.pill-button::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  width: 120%;
+  height: 0;
+  padding-bottom: 120%;
+  background-color: var(--zzz-white);
+  border-radius: 50%;
+  transform: translate(-50%, 0) scaleY(0);
+  transform-origin: bottom center;
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  z-index: -1;
+}
+
+.pill-button:hover::after {
+  transform: translate(-50%, -100%) scaleY(1);
+  border-radius: 0;
+}
+
+.btn-content-wrapper {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  overflow: hidden;
+  height: 1.2em;
+}
+
+.btn-text {
+  display: block;
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  line-height: 1.2;
+}
+
+.btn-text-bottom {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  color: var(--zzz-black);
+}
+
+.pill-button:hover .btn-text {
+  transform: translateY(-100%);
+}
+
+.pill-button:not(:hover) .btn-text {
+  transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.pill-button:not(:hover)::after {
+  transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Variants */
+.btn-variant-filled {
+  background: var(--zzz-gray);
+  color: var(--zzz-white);
+}
+
+.btn-variant-outline {
+  border: 1px solid rgba(var(--zzz-accent-rgb), 0.3);
+  color: var(--zzz-accent);
+}
+
+.btn-variant-ghost {
+  color: var(--zzz-white);
+}
+
+/* Sizes */
+.btn-size-sm {
+  padding: 8px 16px;
+  font-size: 12px;
+}
+
+.btn-size-md {
+  padding: 12px 24px;
+  font-size: 14px;
+}
+
+.btn-size-lg {
+  padding: 16px 32px;
+  font-size: 16px;
+}
+
+.btn-icon {
+  margin-left: 8px;
+  display: inline-flex;
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.pill-button:hover .btn-icon {
+  color: var(--zzz-black);
+}

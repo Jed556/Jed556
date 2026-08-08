@@ -1,0 +1,128 @@
+.project-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(10, 10, 11, 0.9);
+  backdrop-filter: blur(10px);
+}
+
+.project-modal-content {
+  width: 100%;
+  height: 100%;
+  background-color: var(--zzz-black);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+.project-modal-inner {
+  max-width: 800px;
+  width: 100%;
+}
+
+.modal-title {
+  font-size: 4rem;
+  color: var(--zzz-accent);
+  margin-bottom: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .modal-title {
+    font-size: 2.5rem;
+  }
+}
+
+.modal-meta {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 2rem;
+  font-family: var(--font-mono);
+  color: var(--zzz-white);
+}
+
+.modal-lang {
+  color: var(--zzz-accent);
+}
+
+.modal-desc {
+  font-family: var(--font-body);
+  font-size: 1.5rem;
+  line-height: 1.6;
+  color: #ccc;
+  margin-bottom: 2.5rem;
+}
+
+.modal-topics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 3rem;
+}
+
+.modal-topic-tag {
+  background-color: var(--zzz-gray-light);
+  color: var(--zzz-white);
+  font-family: var(--font-mono);
+  padding: 8px 16px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.modal-links {
+  display: flex;
+  gap: 1rem;
+}
+
+.pill-link {
+  display: inline-block;
+  padding: 12px 24px;
+  background-color: transparent;
+  color: var(--zzz-white);
+  border: 1px solid var(--zzz-accent);
+  border-radius: 30px;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.pill-link:hover {
+  background-color: var(--zzz-accent);
+  color: var(--zzz-black);
+}
+
+.modal-close-btn {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 12px 32px;
+  background-color: var(--zzz-gray);
+  color: var(--zzz-white);
+  border: 1px solid var(--zzz-gray-light);
+  border-radius: 30px;
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  cursor: pointer;
+  animation: float 3s ease-in-out infinite;
+}
+
+.modal-close-btn:hover {
+  border-color: var(--zzz-accent);
+  color: var(--zzz-accent);
+}
+
+@keyframes float {
+  0% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(-10px); }
+  100% { transform: translateX(-50%) translateY(0); }
+}

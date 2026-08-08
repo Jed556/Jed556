@@ -1,0 +1,119 @@
+.typo-bg-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 0; /* Keep it behind main content but above the base body */
+  overflow: hidden;
+  background-color: #f6f6f6;
+  pointer-events: none; /* Let clicks pass through */
+}
+
+.typo-bg-container::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  background: radial-gradient(circle at center, transparent 40%, rgba(0, 0, 0, 0.25) 120%);
+  z-index: 10;
+}
+
+/* Container for parallaxing the entire background grid */
+.typo-layer-container {
+  position: absolute;
+  top: -20%;
+  left: -20%;
+  width: 140%;
+  height: 140%;
+}
+
+/* Background repeating marquee */
+.typo-bg-greyscale {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  height: 100%;
+  transform: rotate(-10deg) scale(3.0); /* Scaled up to compensate for extreme Z push */
+}
+
+.marquee-row {
+  display: flex;
+  white-space: nowrap;
+  font-family: 'Bebas Neue', sans-serif;
+  font-style: italic;
+  font-weight: 900;
+  font-size: 6vw;
+  letter-spacing: 0.02em;
+  line-height: 0.85;
+  color: rgba(0, 0, 0, 0.06); /* Solid light grey fill, not outline */
+  text-transform: uppercase;
+  animation: marquee 20s linear infinite;
+  user-select: none;
+}
+
+/* Alternate row size */
+.marquee-row:nth-child(even) {
+  font-size: 3vw;
+  color: rgba(0, 0, 0, 0.04);
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+/* Foreground typographic elements */
+.typo-layer {
+  position: absolute;
+  font-family: 'Bebas Neue', sans-serif;
+  user-select: none;
+  transform: rotate(-10deg);
+}
+
+.typo-cursive {
+  top: 12%;
+  left: 2%;
+  font-family: 'The Historia', cursive;
+  font-size: 13vw;
+  color: #111111;
+  transform: rotate(-15deg);
+  line-height: 1;
+}
+
+.typo-center-text {
+  font-family: 'Impact', sans-serif;
+  font-size: 32vw;
+  font-weight: 700;
+  font-style: italic;
+  color: #111111;
+  text-align: center;
+}
+
+.typo-outline .typo-center-text {
+  color: transparent;
+  -webkit-text-stroke: 1.5px #111111;
+}
+
+.typo-outline-top {
+}
+
+.typo-corner-br {
+  bottom: 8%;
+  right: 8%;
+  font-family: 'Roboto', sans-serif;
+  font-style: italic;
+  font-size: 3.5vw;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #111111;
+  text-align: right;
+  line-height: 1;
+}

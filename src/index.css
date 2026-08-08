@@ -1,0 +1,97 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&family=Syne:wght@400..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@400;500;600;700&family=Great+Vibes&family=Bebas+Neue&family=Caveat:wght@700&family=Noto+Sans+JP:wght@400;900&family=Kalam:wght@700&display=swap');
+
+
+
+@font-face {
+  font-family: 'The Historia';
+  src: url('/fonts/TheHistoriaDemo.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'RobotoFlex Baked 800';
+  src: url('/fonts/RobotoFlex-w800-x85-baked.ttf') format('truetype');
+}
+:root {
+  --zzz-accent: #FFE600;
+  --zzz-accent-rgb: 255, 230, 0;
+  --zzz-black: #FFFFFF;
+  --zzz-white: #0A0A0B;
+  --zzz-gray: #E5E5E5;
+  --zzz-gray-light: #D5D5D5;
+  --zzz-gray-mid: #C5C5C5;
+  --zzz-danger: #FF3333;
+  --font-display: 'Orbitron', sans-serif;
+  --font-body: 'Rajdhani', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  cursor: none !important;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--zzz-black);
+  font-family: var(--font-body);
+  color: var(--zzz-white);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--zzz-black);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--zzz-gray-mid);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--zzz-accent);
+}
+
+::selection {
+  background-color: var(--zzz-white);
+  color: var(--zzz-black);
+}
+
+.hazard-stripe-bg {
+  background: repeating-linear-gradient(
+    45deg,
+    var(--zzz-accent),
+    var(--zzz-accent) 10px,
+    var(--zzz-black) 10px,
+    var(--zzz-black) 20px
+  );
+}
+
+@keyframes glitch {
+  0% { transform: translate(0) }
+  20% { transform: translate(-2px, 2px) }
+  40% { transform: translate(-2px, -2px) }
+  60% { transform: translate(2px, 2px) }
+  80% { transform: translate(2px, -2px) }
+  100% { transform: translate(0) }
+}
+
+.glitch {
+  animation: glitch 0.3s cubic-bezier(.25, .46, .45, .94) both infinite;
+}

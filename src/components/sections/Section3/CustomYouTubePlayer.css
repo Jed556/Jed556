@@ -1,0 +1,177 @@
+.custom-yt-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+}
+
+.custom-yt-iframe-wrapper {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none; /* Let custom cursor pass through */
+}
+
+.custom-yt-iframe {
+  width: 100%;
+  height: 100%;
+}
+
+.custom-yt-iframe-element {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+.custom-yt-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  cursor: none; /* Use the global custom cursor */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.custom-yt-center-icon {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.4);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.3s, transform 0.3s;
+  opacity: 1;
+  transform: scale(1);
+}
+
+.custom-yt-center-icon.hidden {
+  opacity: 0;
+  transform: scale(0.8);
+  pointer-events: none;
+}
+
+.custom-yt-controls-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 16px;
+  z-index: 20;
+  transform: translateY(100%);
+  opacity: 0;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s;
+}
+
+.custom-yt-controls-bar.visible {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.custom-yt-controls-bg {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 120%;
+  background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+  z-index: -1;
+  pointer-events: none;
+}
+
+.custom-yt-controls-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.custom-yt-btn {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  opacity: 0.8;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.custom-yt-btn:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.custom-yt-time {
+  color: white;
+  font-size: 12px;
+  font-family: var(--font-mono, monospace);
+  opacity: 0.8;
+  min-width: 40px;
+  text-align: center;
+}
+
+.custom-yt-seekbar {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+  position: relative;
+}
+
+/* Seekbar fill effect using CSS var */
+.custom-yt-seekbar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: var(--progress, 0%);
+  background: #ff0000;
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+.custom-yt-seekbar::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #ff0000;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.custom-yt-seekbar::-webkit-slider-thumb:hover {
+  transform: scale(1.3);
+}
+
+.custom-yt-seekbar::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #ff0000;
+  cursor: pointer;
+  border: none;
+  transition: transform 0.1s;
+}
+
+.custom-yt-seekbar::-moz-range-thumb:hover {
+  transform: scale(1.3);
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}

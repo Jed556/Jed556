@@ -1,0 +1,120 @@
+.floating-menu-container {
+  position: fixed;
+  bottom: 40px;
+  right: 40px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 16px;
+}
+
+.menu-items {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.menu-pill {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--zzz-black);
+  color: var(--zzz-white);
+  padding: 8px 16px 8px 8px;
+  border-radius: 999px;
+  text-decoration: none;
+  font-family: var(--font-body);
+  font-size: 1.1rem;
+  font-weight: 600;
+  width: 220px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.menu-pill:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.menu-pill-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  margin-right: 12px;
+}
+
+.menu-pill-label {
+  flex: 1;
+}
+
+.menu-pill-arrow {
+  width: 20px;
+  height: 20px;
+  opacity: 0.5;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.menu-pill:hover .menu-pill-arrow {
+  opacity: 1;
+  transform: translateX(2px);
+}
+
+.floating-menu-toggle {
+  background: var(--zzz-black);
+  color: var(--zzz-white);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  border-radius: 999px;
+  height: 52px;
+  width: 220px;
+  padding: 0 16px 0 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  outline: none;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  box-sizing: border-box;
+}
+
+.toggle-label {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.hamburger-icon {
+  width: 20px;
+  height: 14px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.hamburger-icon span {
+  display: block;
+  height: 2px;
+  width: 100%;
+  background-color: var(--zzz-white);
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+
+.floating-menu-toggle.open .hamburger-icon span:nth-child(1) {
+  transform: translateY(6px) rotate(45deg);
+}
+
+.floating-menu-toggle.open .hamburger-icon span:nth-child(2) {
+  opacity: 0;
+}
+
+.floating-menu-toggle.open .hamburger-icon span:nth-child(3) {
+  transform: translateY(-6px) rotate(-45deg);
+}

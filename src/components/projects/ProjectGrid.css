@@ -1,0 +1,23 @@
+.project-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.project-card-wrapper.span-2 {
+  grid-row: span 2;
+}
+
+@media (max-width: 768px) {
+  .project-card-wrapper.span-2 {
+    grid-row: span 1;
+  }
+  
+  .project-grid {
+    padding: 1rem;
+    grid-template-columns: 1fr;
+  }
+}

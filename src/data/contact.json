@@ -1,0 +1,32 @@
+[
+  {
+    "platform": "LinkedIn",
+    "url": "https://www.linkedin.com/in/jed556",
+    "icon": "/icons/linkedin.svg"
+  },
+  {
+    "platform": "GitHub",
+    "url": "https://github.com/Jed556",
+    "icon": "/icons/github.svg"
+  },
+  {
+    "platform": "Discord",
+    "url": "https://discord.com/users/839430747088617472",
+    "icon": "/icons/discord.svg"
+  },
+  {
+    "platform": "Twitter",
+    "url": "",
+    "icon": "/icons/x.svg"
+  },
+  {
+    "platform": "Instagram",
+    "url": "",
+    "icon": "/icons/instagram.svg"
+  },
+  {
+    "platform": "Email",
+    "url": "https://mail.google.com/mail/?view=cm&fs=1&to=jguiriba11@gmail.com",
+    "icon": "/icons/gmail.svg"
+  }
+]
