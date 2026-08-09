@@ -1,32 +1,60 @@
-# React + TypeScript + Vite
+# Jed556 - Portfolio / Showcase (React + TypeScript + Vite)
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+This branch is a personal portfolio and projects site built with React, TypeScript, and Vite. It contains the main app (located in `src/`), a few local packages used for WebGL/Three.js utilities, and a reference site copy for legacy assets.
 
-Currently, two official plugins are available:
+## What this is
+- A modern portfolio front-end using React 19, Vite, and TypeScript.
+- Heavy use of Three.js and `@react-three/fiber` for WebGL scenes and immersive background effects.
+- Local packages in `packages/` contain reusable Three.js helpers used by the site.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Quick start
+1. Install dependencies:
 
-## React Compiler
+  ```
+  npm install
+  ```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+2. Run the development server (Vite + HMR):
 
-## Expanding the Oxlint configuration
+  ```
+  npm run dev
+  ```
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+3. Build for production:
 
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
-```
+  ```
+  npm run build
+  ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+4. Preview a production build locally:
+
+  ```
+  npm run preview
+  ```
+
+Available npm scripts are declared in `package.json` (`dev`, `build`, `preview`, `lint`).
+
+## Project structure (important files/folders)
+- `src/` — application source: components, pages, assets, hooks, and utils. The React entry is `main.tsx` / `App.tsx`.
+- `public/` — static assets (fonts, icons, project screenshots used by the site).
+- `packages/` — local packages (e.g., `ore-three`, `power-mesh`) that provide Three.js utilities and are consumed by the main app.
+- `reference_next.junni.co.jp/` — an archived/legacy reference site and build tooling (gulp/webpack) kept for reference.
+- `vite.config.ts`, `tsconfig*.json` — build and TypeScript configuration.
+
+## Notable implementation details
+- Uses `@react-three/fiber`, `@react-three/drei`, and `postprocessing` for 3D rendering and effects.
+- Framer Motion is used for UI transitions and micro-interactions.
+- `sharp` is included as a dependency for image processing in build pipelines (if used).
+
+## Development notes
+- Lint with `npm run lint` (oxlint is configured; consider enabling type-aware rules for stricter checks).
+- TypeScript project references are used; the `build` script runs `tsc -b` before `vite build`.
+
+## Where to look for things
+- Homepage and routes: `src/pages/` (e.g., `Home.tsx`, `Projects.tsx`, `Contact.tsx`).
+- Shared UI: `src/components/ui/` and `src/components/layout/`.
+- WebGL backgrounds: `src/components/background/` and `packages/` for lower-level helpers.
+
+## Contributing / Extending
+- Add or update content in `src/pages` and `src/components`.
+- If you add native node scripts that depend on `sharp` or other native libs, run a fresh `npm install` and rebuild.
