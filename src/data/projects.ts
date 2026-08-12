@@ -235,7 +235,7 @@ export const portfolioProjects: ProjectGroup[] = [
       },
       {
         name: "Shirt Vote",
-        description: "Design for the shirt voting campaign.",
+        description: "Shirt voting campaign promotional material.",
         fullResPreviews: ["/projects/shirt-vote.png"],
         previews: ["/projects/shirt-vote-webgl.webp"],
         date: "16.03.2023",
@@ -243,7 +243,7 @@ export const portfolioProjects: ProjectGroup[] = [
       },
       {
         name: "Plagg",
-        description: "Plagg character graphic design.",
+        description: "PlaGG esports logo graphic design.",
         fullResPreviews: ["/projects/plagg.png"],
         previews: ["/projects/plagg-webgl.webp"],
         date: "17.08.2022",
@@ -251,7 +251,7 @@ export const portfolioProjects: ProjectGroup[] = [
       },
       {
         name: "Milktea-Sha",
-        description: "MTS graphical poster.",
+        description: "Milktea-Sha business logo commission.",
         fullResPreviews: ["/projects/mts.png"],
         previews: ["/projects/mts-webgl.webp"],
         date: "30.11.2021",

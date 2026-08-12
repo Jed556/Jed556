@@ -12,6 +12,14 @@ export interface Experience {
 const rawExperiences: Omit<Experience, 'position' | 'rotationY'>[] = [
   {
     id: 'exp-1',
+    role: 'Freelance Multimedia Editor',
+    company: 'Self-Employed',
+    periodStart: '00/2020',
+    periodEnd: '00/2024',
+    description: 'Specialized in graphic design and video editing to craft compelling digital experiences for clients.',
+  },
+  {
+    id: 'exp-2',
     role: 'Internship',
     company: 'DOST CALABARZON',
     periodStart: '03/2026',
@@ -19,12 +27,12 @@ const rawExperiences: Omit<Experience, 'position' | 'rotationY'>[] = [
     description: 'Contributed to the development of the SERVE System. Assisted in computer hardware, software, and printer troubleshooting, providing technical support.',
   },
   {
-    id: 'exp-2',
-    role: 'Freelance Multimedia Editor',
-    company: 'Self-Employed',
-    periodStart: '00/2020',
-    periodEnd: '00/2024',
-    description: 'Specialized in graphic design and video editing to craft compelling digital experiences for clients.',
+    id: 'exp-3',
+    role: 'BS Computer Science Graduate',
+    company: 'Colegio de San Juan de Letran Calamba',
+    periodStart: '00/0000',
+    periodEnd: '06/2026',
+    description: 'Graduated with a Bachelor of Science in Computer Science from Colegio de San Juan de Letran Calamba. Awarded best research paper in the field of computer science.',
   }
 ];
 

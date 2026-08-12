@@ -1,11 +1,13 @@
 export const formatDate = (ts?: string) => {
   if (!ts) return '';
   if (ts.toLowerCase() === 'present') return 'Present';
-  
+
   // Format MM/YYYY
   const parts = ts.split('/');
   if (parts.length === 2) {
     const [mm, yyyy] = parts;
+    // Hide dates with year 0000
+    if (yyyy === '0000') return '';
     if (mm === '00') return yyyy;
     const date = new Date(parseInt(yyyy), parseInt(mm) - 1);
     if (!isNaN(date.getTime())) {
@@ -20,7 +22,10 @@ export const formatDate = (ts?: string) => {
     const part1 = parseInt(dotParts[0]);
     const part2 = parseInt(dotParts[1]);
     const year = parseInt(dotParts[2]);
-    
+
+    // Hide dates with year 0000
+    if (year === 0) return '';
+
     // If the middle part is > 12, it must be MM.DD.YYYY
     let monthIndex = 0;
     if (part2 > 12) {
@@ -42,6 +47,17 @@ export const formatDate = (ts?: string) => {
 
 export const formatPeriod = (start?: string, end?: string) => {
   if (!start && !end) return '';
-  if (start && end) return `${formatDate(start)} - ${formatDate(end)}`;
-  return formatDate(start || end || '');
+
+  const formattedStart = formatDate(start);
+  const formattedEnd = formatDate(end);
+
+  // If both are empty, return empty
+  if (!formattedStart && !formattedEnd) return '';
+
+  // If only one is populated, return that one
+  if (formattedStart && !formattedEnd) return formattedStart;
+  if (!formattedStart && formattedEnd) return formattedEnd;
+
+  // Both are populated
+  return `${formattedStart} - ${formattedEnd}`;
 };

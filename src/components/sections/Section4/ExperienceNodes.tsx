@@ -17,14 +17,14 @@ import { formatPeriod } from '../../../utils/dateFormatter';
 export const ExperienceNodes: React.FC<ExperienceNodesProps> = ({ opacityRef, activeNodePosRef, activeNodeRotRef }) => {
   const groupRefs = useRef<(THREE.Group | null)[]>([]);
   const progressRefs = useRef<React.MutableRefObject<number>[]>(experiences.map(() => ({ current: 0 })));
-  
+
   // We need refs for the 3 text components per node to animate their opacity and position
   const roleRefs = useRef<(any | null)[]>([]);
   const companyRefs = useRef<(any | null)[]>([]);
   const descRefs = useRef<(any | null)[]>([]);
 
   // The speed at which nodes move towards the camera per internal scroll unit
-  const Z_SPEED = 12.0; 
+  const Z_SPEED = 12.0;
   // Initial starting depth
   const Z_START = -40.0;
 
@@ -35,14 +35,14 @@ export const ExperienceNodes: React.FC<ExperienceNodesProps> = ({ opacityRef, ac
     const scrollVal = scrollManager.internalScrollValue;
     // We STILL use Gaussian weights to map out the physical flight path position
     // We use a clean Gaussian blend of the camera's ideal path!
-    let totalWeight = 0; 
+    let totalWeight = 0;
     let weightedX = 0;
     let weightedY = 0;
     let weightedRot = 0;
 
-    const TARGET_Z = 15.0; 
+    const TARGET_Z = 15.0;
     // Tighter spread (800) so the camera quickly snaps to the normal line of the next text
-    const SPREAD = 800.0; 
+    const SPREAD = 800.0;
 
     // Find the next upcoming node to look at
     let activeNodeIndex = 0;
@@ -69,40 +69,44 @@ export const ExperienceNodes: React.FC<ExperienceNodesProps> = ({ opacityRef, ac
       } else if (currentZ > 10) {
         localOpacity = Math.max(0, 1.0 - ((currentZ - 10) / 4.0));
       }
-      
+
       progressRefs.current[index].current = localOpacity;
-      
+
       if (currentZ > 20 || localOpacity <= 0.01) {
         group.visible = false;
       } else {
         group.visible = true;
-        
+
         // Premium typographic reveal: Slide up slightly and fade in
-        const easeOpacity = Math.pow(localOpacity, 2.0); 
+        const easeOpacity = Math.pow(localOpacity, 2.0);
         const slideOffset = (1.0 - easeOpacity) * -0.5;
 
         // Dynamic top-down layout
-        const roleLineHeight = 1.1; 
+        const roleLineHeight = 1.1;
         const isMultiline = exp.role.length > 20;
-        
+
         // Only check for descenders on the last line of the role
         const roleLastLine = isMultiline ? exp.role.substring(exp.role.lastIndexOf(' ')) : exp.role;
         const roleHasDescender = /[gjpqy,;Q]/.test(roleLastLine);
-        
+
         const formattedPeriod = formatPeriod(exp.periodStart, exp.periodEnd);
-        const companyHasDescender = /[gjpqy,;Q]/.test(exp.company + formattedPeriod);
+        // Company wraps to new line only if longer than 35 characters
+        const companyNeedsNewline = !!formattedPeriod && exp.company.length > 35;
+        const companyHasDescender = /[gjpqy,;Q]/.test((exp.company + (formattedPeriod || '')).split('\n').pop() || '');
 
         let currentY = 1.1; // Top starting position
 
         const roleBaseY = currentY;
         currentY -= isMultiline ? (0.6 * 1.8 * roleLineHeight) : 0.6;
-        
+
         currentY -= 0.15; // Gap below role
         if (roleHasDescender) currentY -= 0.08;
 
         const companyBaseY = currentY;
-        currentY -= 0.25; // Company height
-        
+        // Company takes 2 lines when long, 1 line when short
+        const companyLineHeight = companyNeedsNewline ? 0.5 : 0.25;
+        currentY -= companyLineHeight;
+
         currentY -= 0.15; // Gap below company
         if (companyHasDescender) currentY -= 0.08;
 
@@ -151,12 +155,12 @@ export const ExperienceNodes: React.FC<ExperienceNodesProps> = ({ opacityRef, ac
 
       // The distance from the camera to the text (Positive if text is in front of camera)
       // We clamp it to 0 when it passes the camera so it doesn't shoot sideways to infinity
-      const distToCamera = Math.max(0, TARGET_Z - currentZ); 
-      const normalX = Math.sin(rotY); 
+      const distToCamera = Math.max(0, TARGET_Z - currentZ);
+      const normalX = Math.sin(rotY);
 
       // To guarantee we face the text perfectly FLATLY and keep it in the dead center,
       // the camera MUST physically travel exactly along the text's infinite normal vector!
-      const idealX = xPos + normalX * distToCamera; 
+      const idealX = xPos + normalX * distToCamera;
 
       // Apply Gaussian weight based on Z distance so the camera smoothly weaves from 
       // one normal line to the next!
@@ -170,10 +174,10 @@ export const ExperienceNodes: React.FC<ExperienceNodesProps> = ({ opacityRef, ac
     });
 
     // Determine the exact physical position target
-    const smoothTargetPos = totalWeight > 0 
+    const smoothTargetPos = totalWeight > 0
       ? new THREE.Vector3(weightedX / totalWeight, weightedY / totalWeight, 0)
       : new THREE.Vector3(0, 0, 0);
-      
+
     const smoothTargetRot = totalWeight > 0 ? weightedRot / totalWeight : 0;
 
     // Smooth, organic lerp that perfectly follows the nodes
@@ -186,85 +190,88 @@ export const ExperienceNodes: React.FC<ExperienceNodesProps> = ({ opacityRef, ac
     <group>
       {experiences.map((exp, index) => {
         // Dynamic top-down layout
-        const roleLineHeight = 1.1; 
+        const roleLineHeight = 1.1;
         const isMultiline = exp.role.length > 20;
-        
+
         const roleLastLine = isMultiline ? exp.role.substring(exp.role.lastIndexOf(' ')) : exp.role;
         const roleHasDescender = /[gjpqy,;Q]/.test(roleLastLine);
-        
-        const formattedPeriod = formatPeriod(exp.periodStart, exp.periodEnd);
-        const companyHasDescender = /[gjpqy,;Q]/.test(exp.company + formattedPeriod);
 
-        let currentY = 1.1;
+        const formattedPeriod = formatPeriod(exp.periodStart, exp.periodEnd);
+        const companyHasMultiline = !!formattedPeriod;
+        const companyHasDescender = /[gjpqy,;Q]/.test((exp.company + (formattedPeriod || '')).split('\n').pop() || '');
+
+        let currentY = 1.1; // Top starting position
 
         const roleBaseY = currentY;
         currentY -= isMultiline ? (0.6 * 1.8 * roleLineHeight) : 0.6;
-        
-        currentY -= 0.15;
+
+        currentY -= 0.15; // Gap below role
         if (roleHasDescender) currentY -= 0.08;
 
         const companyBaseY = currentY;
-        currentY -= 0.25;
-        
+        const companyLineHeight = companyHasMultiline ? 0.5 : 0.25;
+        currentY -= companyLineHeight;
+
         currentY -= 0.15;
         if (companyHasDescender) currentY -= 0.08;
 
         const descBaseY = currentY;
 
         return (
-        <group key={exp.id} ref={(el) => (groupRefs.current[index] = el)}>
-          {/* Role */}
-          <Text
-            ref={(el: any) => roleRefs.current[index] = el}
-            position={[0, roleBaseY, 0]}
-            fontSize={0.6}
-            lineHeight={roleLineHeight}
-            color="#ffffff"
-            font="/fonts/ScienceGothic-w350-x70-baked.ttf"
-            anchorX="center"
-            anchorY="top"
-            maxWidth={5.5}
-            textAlign="center"
-            outlineWidth={0.02}
-            outlineColor="#000000"
-          >
-            {exp.role}
-          </Text>
-          
-          {/* Company & Period */}
-          <Text
-            ref={(el: any) => companyRefs.current[index] = el}
-            position={[0, companyBaseY, 0]}
-            fontSize={0.25}
-            color="#a0a0a0"
-            font="/fonts/ScienceGothic-w350-x70-baked.ttf"
-            anchorX="center"
-            anchorY="top"
-            maxWidth={5.5}
-            textAlign="center"
-            outlineWidth={0.01}
-            outlineColor="#000000"
-          >
-            {formattedPeriod ? `${exp.company}  //  ${formattedPeriod}` : exp.company}
-          </Text>
+          <group key={exp.id} ref={(el) => (groupRefs.current[index] = el)}>
+            {/* Role */}
+            <Text
+              ref={(el: any) => roleRefs.current[index] = el}
+              position={[0, roleBaseY, 0]}
+              fontSize={0.6}
+              lineHeight={roleLineHeight}
+              color="#ffffff"
+              font="/fonts/ScienceGothic-w350-x70-baked.ttf"
+              anchorX="center"
+              anchorY="top"
+              maxWidth={5.5}
+              textAlign="center"
+              outlineWidth={0.02}
+              outlineColor="#000000"
+            >
+              {exp.role}
+            </Text>
 
-          {/* Description */}
-          <Text
-            ref={(el: any) => descRefs.current[index] = el}
-            position={[0, descBaseY, 0]}
-            fontSize={0.18}
-            color="#777777"
-            font="/fonts/ScienceGothic-w350-x70-baked.ttf"
-            anchorX="center"
-            anchorY="top"
-            maxWidth={4.0}
-            textAlign="center"
-            outlineWidth={0.005}
-            outlineColor="#000000"
-          >
-            {exp.description}
-          </Text>
-        </group>
+            {/* Company & Period */}
+            <Text
+              ref={(el: any) => companyRefs.current[index] = el}
+              position={[0, companyBaseY, 0]}
+              fontSize={0.25}
+              lineHeight={1.2}
+              color="#a0a0a0"
+              font="/fonts/ScienceGothic-w350-x70-baked.ttf"
+              anchorX="center"
+              anchorY="top"
+              maxWidth={5.5}
+              textAlign="center"
+              outlineWidth={0.01}
+              outlineColor="#000000"
+            >
+              {formattedPeriod ? (exp.company.length > 35 ? `${exp.company}\n// ${formattedPeriod}` : `${exp.company}  //  ${formattedPeriod}`) : exp.company}
+            </Text>
+
+            {/* Description */}
+            <Text
+              ref={(el: any) => descRefs.current[index] = el}
+              position={[0, descBaseY, 0]}
+              fontSize={0.18}
+              color="#777777"
+              font="/fonts/ScienceGothic-w350-x70-baked.ttf"
+              anchorX="center"
+              anchorY="top"
+              maxWidth={4.0}
+              textAlign="center"
+              outlineWidth={0.005}
+              outlineColor="#000000"
+            >
+              {exp.description}
+            </Text>
+          </group>
         );
       })}
     </group>
