@@ -17,7 +17,7 @@ on:
   workflow_dispatch:
     inputs:
       run:
-        description: "Comma-separated list of targets to execute (user,repositories,gists,languages,wakatime,streak,anilist,steam,music,spotify,youtube,apple,new_game,all)"
+        description: "Comma-separated list of targets to execute (user,repositories,gists,languages,wakatime,streak,anilist,steam,music,new_game,all)"
         required: true
         default: "all"
   push:
@@ -32,13 +32,10 @@ concurrency:
 jobs:
 
   Metrics:
-    if: ${{ github.event_name != 'workflow_dispatch' || inputs.run == 'all' || contains(inputs.run, 'user') || contains(inputs.run, 'repositories') || contains(inputs.run, 'languages') || contains(inputs.run, 'wakatime') || contains(inputs.run, 'streak') || contains(inputs.run, 'anilist') || contains(inputs.run, 'steam') || contains(inputs.run, 'music') || contains(inputs.run, 'spotify') || contains(inputs.run, 'youtube') || contains(inputs.run, 'apple') }}
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.run == 'all' || contains(inputs.run, 'user') || contains(inputs.run, 'repositories') || contains(inputs.run, 'languages') || contains(inputs.run, 'wakatime') || contains(inputs.run, 'streak') || contains(inputs.run, 'anilist') || contains(inputs.run, 'steam') || contains(inputs.run, 'music') }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    env:
-      MUSIC_PROVIDER: ${{ vars.MUSIC_PROVIDER != '' && vars.MUSIC_PROVIDER || 'spotify' }}
-      MUSIC_USER: ${{ vars.MUSIC_USER != '' && vars.MUSIC_USER || 'Jed' }}
     steps:
       - name: User
         if: ${{ (github.event_name != 'workflow_dispatch' || inputs.run == 'all' || contains(inputs.run, 'user')) && (github.event_name != 'schedule' || github.event.schedule == '0 */4 * * *') }}
@@ -219,7 +216,7 @@ jobs:
             }
 
       - name: Music
-        if: ${{ (github.event_name != 'workflow_dispatch' || inputs.run == 'all' || contains(inputs.run, 'music') || contains(inputs.run, 'spotify') || contains(inputs.run, 'youtube') || contains(inputs.run, 'lastfm') || contains(inputs.run, 'apple')) && (github.event_name != 'schedule' || github.event.schedule == '*/10 * * * *') && (env.MUSIC_PROVIDER == 'spotify' || env.MUSIC_PROVIDER == 'youtube' || env.MUSIC_PROVIDER == 'lastfm' || env.MUSIC_PROVIDER == 'apple') }}
+        if: ${{ (github.event_name != 'workflow_dispatch' || inputs.run == 'all' || contains(inputs.run, 'music')) && (github.event_name != 'schedule' || github.event.schedule == '*/10 * * * *') && (vars.MUSIC_PROVIDER == 'spotify' || vars.MUSIC_PROVIDER == 'youtube' || vars.MUSIC_PROVIDER == 'lastfm' || vars.MUSIC_PROVIDER == 'apple') }}
         uses: lowlighter/metrics@latest
         with:
           token: NOT_NEEDED
@@ -229,14 +226,14 @@ jobs:
           # OPTIONS
           config_timezone: Asia/Manila
           plugin_music: yes
-          plugin_music_provider: ${{ env.MUSIC_PROVIDER }}
-          plugin_music_user: ${{ env.MUSIC_USER }}
+          plugin_music_provider: ${{ vars.MUSIC_PROVIDER }}
+          plugin_music_user: ${{ vars.MUSIC_USER }}
           plugin_music_limit: 3
           plugin_music_mode: recent
           plugin_music_played_at: yes
           plugin_music_time_range: short
           plugin_music_top_type: tracks
-          plugin_music_token: ${{ env.MUSIC_PROVIDER == 'spotify' && format('{0},{1},{2}', secrets.SPOTIFY_CLIENT_ID, secrets.SPOTIFY_CLIENT_SECRET, secrets.SPOTIFY_REFRESH_TOKEN) || env.MUSIC_PROVIDER == 'youtube' && secrets.YOUTUBE_MUSIC_TOKEN || env.MUSIC_PROVIDER == 'lastfm' && secrets.LASTFM_TOKEN || env.MUSIC_PROVIDER == 'apple' && secrets.APPLE_MUSIC_TOKEN || '' }}
+          plugin_music_token: ${{ vars.MUSIC_PROVIDER == 'spotify' && format('{0},{1},{2}', secrets.SPOTIFY_CLIENT_ID, secrets.SPOTIFY_CLIENT_SECRET, secrets.SPOTIFY_REFRESH_TOKEN) || vars.MUSIC_PROVIDER == 'youtube' && secrets.YOUTUBE_MUSIC_TOKEN || vars.MUSIC_PROVIDER == 'lastfm' && secrets.LASTFM_TOKEN || vars.MUSIC_PROVIDER == 'apple' && secrets.APPLE_MUSIC_TOKEN || '' }}
 
   New_Game:
     needs: [Metrics]
