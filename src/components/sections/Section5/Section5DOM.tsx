@@ -104,16 +104,27 @@ const Section5DOM: React.FC = () => {
             ))}
           </motion.div>
           
+          <style>{`
+            .contact-icons-container {
+              position: absolute;
+              bottom: 10vh;
+              display: flex;
+              pointer-events: auto;
+            }
+            @media (max-width: 768px) {
+              .contact-icons-container {
+                bottom: 16vh;
+              }
+            }
+          `}</style>
+          
           <motion.div 
+            className="contact-icons-container"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1.0, delay: 3.5, ease: 'easeOut' }}
             style={{ 
-              position: 'absolute',
-              bottom: '10vh',
-              display: 'flex', 
-              gap: gapSize, 
-              pointerEvents: 'auto' 
+              gap: gapSize
             }}
           >
             {contactData.map((contact, index) => {

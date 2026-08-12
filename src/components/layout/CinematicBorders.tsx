@@ -45,6 +45,9 @@ const SectionIndicator = () => {
           <div
             key={i}
             onClick={() => scrollManager.setSection(i)}
+            data-allow-touch
+            role="button"
+            aria-label={`Go to section ${i + 1}`}
             style={{
               padding: '15px 5px',
               cursor: 'pointer',

@@ -10,8 +10,8 @@ import './FloatingMenu.css';
 const MenuItem = ({ item, i, isOpen, setVariant, setIsOpen, rawX, rawY, menuItemsLength }: any) => {
   const windowWidth = typeof window !== 'undefined' ? window.innerWidth : 1920;
   const windowHeight = typeof window !== 'undefined' ? window.innerHeight : 1080;
-  
-  const reverseIndex = menuItemsLength - i; 
+
+  const reverseIndex = menuItemsLength - i;
   const s = reverseIndex / menuItemsLength;
 
   const menuBaseX = windowWidth - 100;
@@ -22,8 +22,8 @@ const MenuItem = ({ item, i, isOpen, setVariant, setIsOpen, rawX, rawY, menuItem
     if (!isOpen) return 0;
     const dx = (latestRawX as number) - menuBaseX;
     const dy = (latestRawY as number) - menuBaseY;
-    const dist = Math.sqrt(dx*dx + dy*dy);
-    const influence = Math.max(0, 1 - dist / 500); 
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    const influence = Math.max(0, 1 - dist / 500);
     const clampedDx = Math.max(-400, Math.min(400, dx));
     const maxBendX = clampedDx * 0.22 * influence;
     return maxBendX * (s * s);
@@ -33,8 +33,8 @@ const MenuItem = ({ item, i, isOpen, setVariant, setIsOpen, rawX, rawY, menuItem
     if (!isOpen) return 0;
     const dx = (latestRawX as number) - menuBaseX;
     const dy = (latestRawY as number) - menuBaseY;
-    const dist = Math.sqrt(dx*dx + dy*dy);
-    const influence = Math.max(0, 1 - dist / 500); 
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    const influence = Math.max(0, 1 - dist / 500);
     return 20 * influence * (s * s);
   });
 
@@ -42,8 +42,8 @@ const MenuItem = ({ item, i, isOpen, setVariant, setIsOpen, rawX, rawY, menuItem
     if (!isOpen) return 0;
     const dx = (latestRawX as number) - menuBaseX;
     const dy = (latestRawY as number) - menuBaseY;
-    const dist = Math.sqrt(dx*dx + dy*dy);
-    const influence = Math.max(0, 1 - dist / 500); 
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    const influence = Math.max(0, 1 - dist / 500);
     const clampedDx = Math.max(-400, Math.min(400, dx));
     const maxRotate = clampedDx * 0.08 * influence;
     return maxRotate * s;
@@ -61,25 +61,25 @@ const MenuItem = ({ item, i, isOpen, setVariant, setIsOpen, rawX, rawY, menuItem
     <motion.div
       custom={reverseIndex}
       variants={{
-        open: { 
-          opacity: 1, 
-          y: 0, 
-          scale: 1, 
-          transition: { 
-            type: 'spring', 
-            stiffness: 500, 
-            damping: 18, 
-            mass: 0.8 
-          } 
+        open: {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          transition: {
+            type: 'spring',
+            stiffness: 500,
+            damping: 18,
+            mass: 0.8
+          }
         },
-        closed: (customIndex) => ({ 
-          opacity: 0, 
-          y: 68 + (customIndex - 1) * 64, 
-          scale: 1, 
-          transition: { 
+        closed: (customIndex) => ({
+          opacity: 0,
+          y: 68 + (customIndex - 1) * 64,
+          scale: 1,
+          transition: {
             y: { duration: 0.35, ease: "backIn" },
             opacity: { duration: 0.2, delay: 0.15 }
-          } 
+          }
         })
       }}
       style={{ zIndex: 10 - reverseIndex, position: 'relative' }}
@@ -94,19 +94,19 @@ const MenuItem = ({ item, i, isOpen, setVariant, setIsOpen, rawX, rawY, menuItem
         animate={isOpen ? {} : { x: 0, y: 0, rotate: 0, transformOrigin: '50% 50%' }}
         transition={{ type: 'spring', stiffness: 120, damping: 8, mass: 1 }}
       >
-        <Link 
-          to={item.path} 
-          className="menu-pill" 
+        <Link
+          to={item.path}
+          className="menu-pill"
           onClick={() => {
             setIsOpen(false);
             setVariant('default');
-          }} 
+          }}
           data-cursor={isOpen ? "expand" : undefined}
         >
           <div className="menu-pill-icon">{item.icon}</div>
           <span className="menu-pill-label" style={{ fontSize: '0.85rem' }}>{item.label}</span>
           <svg className="menu-pill-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </Link>
       </motion.div>
@@ -133,21 +133,25 @@ export default function FloatingMenu() {
   };
 
   useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
+    const handleClickOutside = (e: Event) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
         setIsOpen(false);
       }
     };
-    
+
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setIsOpen(false);
     };
 
     document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('touchstart', handleClickOutside, { passive: true });
+    document.addEventListener('pointerdown', handleClickOutside);
     document.addEventListener('keydown', handleEsc);
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+      document.removeEventListener('pointerdown', handleClickOutside);
       document.removeEventListener('keydown', handleEsc);
     };
   }, []);
@@ -164,15 +168,15 @@ export default function FloatingMenu() {
   const { rawX, rawY } = useMousePosition();
 
   return (
-    <div 
-      className="floating-menu-container" 
+    <div
+      className="floating-menu-container"
       ref={menuRef}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
       <AnimatePresence>
         {isOpen && (
-          <motion.div 
+          <motion.div
             className="menu-items"
             initial="closed"
             animate="open"
@@ -202,19 +206,21 @@ export default function FloatingMenu() {
       <motion.button
         className={`floating-menu-toggle ${isOpen ? 'open' : ''}`}
         data-cursor="expand"
+        data-allow-touch
+        onClick={() => setIsOpen((prev) => !prev)}
         style={{ zIndex: 20, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 16px', border: 'none', background: 'var(--zzz-black)' }}
       >
         <div style={{ display: 'flex', alignItems: 'center', flex: 1 }}>
           <div className="menu-pill-icon" style={{ margin: 0, marginRight: '12px' }}>{activeItem.icon}</div>
           <span className="toggle-label" style={{ fontSize: '0.85rem' }}>{activeItem.label}</span>
         </div>
-        <div style={{ 
+        <div style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           marginLeft: '12px',
           transformOrigin: '50% 60%',
-          transition: 'transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)', 
+          transition: 'transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
           transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
           opacity: 0.5
         }}>

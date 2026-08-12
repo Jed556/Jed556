@@ -12,6 +12,12 @@
   font-family: 'RobotoFlex Baked 800';
   src: url('/fonts/RobotoFlex-w800-x85-baked.ttf') format('truetype');
 }
+
+@font-face {
+  font-family: 'Impact';
+  src: url('/fonts/impact.ttf') format('truetype');
+}
+
 :root {
   --zzz-accent: #FFE600;
   --zzz-accent-rgb: 255, 230, 0;
@@ -26,7 +32,9 @@
   --font-mono: 'JetBrains Mono', monospace;
 }
 
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -39,15 +47,30 @@
 
 html {
   scroll-behavior: smooth;
+  overscroll-behavior-y: none;
+  overscroll-behavior-x: none;
+  height: 100%;
 }
 
 body {
   background-color: var(--zzz-black);
   font-family: var(--font-body);
   color: var(--zzz-white);
+  overflow: hidden;
   overflow-x: hidden;
+  overscroll-behavior-y: none;
+  overscroll-behavior-x: none;
+  height: 100%;
+  touch-action: none;
+  -webkit-overflow-scrolling: auto;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  height: 100%;
+  overscroll-behavior-y: none;
+  overscroll-behavior-x: none;
 }
 
 ::-webkit-scrollbar {
@@ -74,22 +97,37 @@ body {
 }
 
 .hazard-stripe-bg {
-  background: repeating-linear-gradient(
-    45deg,
-    var(--zzz-accent),
-    var(--zzz-accent) 10px,
-    var(--zzz-black) 10px,
-    var(--zzz-black) 20px
-  );
+  background: repeating-linear-gradient(45deg,
+      var(--zzz-accent),
+      var(--zzz-accent) 10px,
+      var(--zzz-black) 10px,
+      var(--zzz-black) 20px);
 }
 
 @keyframes glitch {
-  0% { transform: translate(0) }
-  20% { transform: translate(-2px, 2px) }
-  40% { transform: translate(-2px, -2px) }
-  60% { transform: translate(2px, 2px) }
-  80% { transform: translate(2px, -2px) }
-  100% { transform: translate(0) }
+  0% {
+    transform: translate(0)
+  }
+
+  20% {
+    transform: translate(-2px, 2px)
+  }
+
+  40% {
+    transform: translate(-2px, -2px)
+  }
+
+  60% {
+    transform: translate(2px, 2px)
+  }
+
+  80% {
+    transform: translate(2px, -2px)
+  }
+
+  100% {
+    transform: translate(0)
+  }
 }
 
 .glitch {

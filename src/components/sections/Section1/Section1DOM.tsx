@@ -130,20 +130,91 @@ const Section1DOM: React.FC<Section1DOMProps> = ({ startAnimation = true }) => {
         backgroundPosition: '0 0, -1px -1px, -1px -1px',
       }} />
 
+      <style>{`
+        .section1-top-left, .section1-top-center, .section1-top-right,
+        .section1-bottom-left, .section1-bottom-center, .section1-bottom-giant-text {
+          transition: top 0.6s cubic-bezier(0.22, 1, 0.36, 1), 
+                      bottom 0.6s cubic-bezier(0.22, 1, 0.36, 1), 
+                      left 0.6s cubic-bezier(0.22, 1, 0.36, 1), 
+                      right 0.6s cubic-bezier(0.22, 1, 0.36, 1), 
+                      transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .section1-top-left {
+          position: absolute;
+          top: 15vh;
+          left: 6vw;
+        }
+        .section1-top-center {
+          position: absolute;
+          top: 15vh;
+          left: 50%;
+          transform: translateX(-50%);
+          text-align: center;
+        }
+        .section1-top-right {
+          position: absolute;
+          top: 15vh;
+          right: 6vw;
+        }
+        .section1-bottom-left {
+          position: absolute;
+          bottom: 8vh;
+          left: 6vw;
+        }
+        .section1-bottom-center {
+          position: absolute;
+          bottom: 8vh;
+          left: 50%;
+          transform: translateX(-50%);
+        }
+        .section1-bottom-giant-text {
+          position: absolute;
+          bottom: 15vh;
+          left: 6vw;
+        }
+        @media (max-width: 850px) {
+          .section1-top-center {
+            top: 24vh;
+            left: 6vw;
+            transform: none;
+            text-align: left;
+          }
+        }
+        @media (max-width: 768px) {
+          .section1-bottom-left {
+            bottom: 14vh;
+          }
+          .section1-bottom-center {
+            bottom: 14vh;
+            left: auto;
+            right: 6vw;
+            transform: none;
+            text-align: right;
+          }
+          .section1-bottom-giant-text {
+            bottom: 22vh;
+          }
+        }
+        @media (max-width: 600px) {
+          .section1-top-center {
+            top: 22vh;
+          }
+        }
+      `}</style>
       <div style={{ position: 'relative', width: '100%', height: '100%', padding: 'clamp(50px, 4vw + 20px, 70px) 4vw' }}>
 
         {/* Top Left: Subtitle */}
-        <div style={{ position: 'absolute', top: '15vh', left: '6vw', fontSize: 'clamp(1rem, 1.5vw + 0.5vh, 1.5rem)', lineHeight: '1.4', fontFamily: "'Inter', sans-serif", fontWeight: 600 }}>
+        <div className="section1-top-left" style={{ fontSize: 'clamp(1rem, 1.5vw + 0.5vh, 1.5rem)', lineHeight: '1.4', fontFamily: "'Inter', sans-serif", fontWeight: 600 }}>
           <ScrambleText text={"Creative &\nDeveloper"} delay={600} duration={1200} start={startAnimation} />
         </div>
 
         {/* Top Center: Tagline */}
-        <div style={{ position: 'absolute', top: '15vh', left: '50%', transform: 'translateX(-50%)', fontSize: 'clamp(0.75rem, 1vw + 0.3vh, 1.1rem)', opacity: 0.7, textAlign: 'center' }}>
+        <div className="section1-top-center" style={{ fontSize: 'clamp(0.75rem, 1vw + 0.3vh, 1.1rem)', opacity: 0.7 }}>
           <ScrambleText text={"Code that scales.\nDesign that speaks."} delay={800} duration={1500} start={startAnimation} />
         </div>
 
         {/* Top Right: Intro paragraph */}
-        <div style={{ position: 'absolute', top: '15vh', right: '6vw', width: 'clamp(200px, 20vw, 350px)', fontSize: 'clamp(0.75rem, 1vw + 0.3vh, 1.1rem)', lineHeight: '1.6', opacity: 0.9 }}>
+        <div className="section1-top-right" style={{ width: 'clamp(200px, 20vw, 350px)', fontSize: 'clamp(0.75rem, 1vw + 0.3vh, 1.1rem)', lineHeight: '1.6', opacity: 0.9 }}>
           <ScrambleText
             text="I'm Jerrald Guiriba, a 2026 Bachelor of Science in Computer Science graduate blending engineering with creativity. I specialize in web and software development, alongside graphic design and video editing to craft compelling digital experiences."
             delay={1000} duration={2000} start={startAnimation}
@@ -151,10 +222,7 @@ const Section1DOM: React.FC<Section1DOMProps> = ({ startAnimation = true }) => {
         </div>
 
         {/* Bottom Left: Giant Text */}
-        <div style={{
-          position: 'absolute',
-          bottom: '15vh',
-          left: '6vw',
+        <div className="section1-bottom-giant-text" style={{
           fontSize: 'clamp(3rem, 7vw, 6rem)',
           fontFamily: "'Inter', sans-serif",
           fontWeight: 800,
@@ -166,12 +234,12 @@ const Section1DOM: React.FC<Section1DOMProps> = ({ startAnimation = true }) => {
         </div>
 
         {/* Bottom Left Edge: Time */}
-        <div style={{ position: 'absolute', bottom: '8vh', left: '6vw', fontSize: 'clamp(8px, 0.8vw + 0.2vh, 12px)', opacity: 0.5, fontFamily: "'Space Mono', monospace", textTransform: 'uppercase' }}>
+        <div className="section1-bottom-left" style={{ fontSize: 'clamp(8px, 0.8vw + 0.2vh, 12px)', opacity: 0.5, fontFamily: "'Space Mono', monospace", textTransform: 'uppercase' }}>
           <LiveTime startAnimation={startAnimation} />
         </div>
 
         {/* Bottom Center Edge: Res */}
-        <div style={{ position: 'absolute', bottom: '8vh', left: '50%', transform: 'translateX(-50%)', fontSize: 'clamp(8px, 0.8vw + 0.2vh, 12px)', opacity: 0.5, fontFamily: "'Space Mono', monospace", textTransform: 'uppercase' }}>
+        <div className="section1-bottom-center" style={{ fontSize: 'clamp(8px, 0.8vw + 0.2vh, 12px)', opacity: 0.5, fontFamily: "'Space Mono', monospace", textTransform: 'uppercase' }}>
           <LiveDimensions startAnimation={startAnimation} />
         </div>
       </div>

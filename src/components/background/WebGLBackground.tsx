@@ -9,6 +9,7 @@ import { Section5 } from '../sections/Section5';
 import Section13D from '../sections/Section1/Section13D';
 import { useScrollState } from '../../utils/useScrollState';
 import { scrollManager } from '../../utils/ScrollManager';
+import { gyroscopeManager } from '../../utils/GyroscopeManager';
 import { RefractionManager } from '../../utils/GlobalRefraction';
 import { GlobalStars } from './GlobalStars';
 
@@ -16,10 +17,83 @@ import { GlobalStars } from './GlobalStars';
 const CameraRig = () => {
   const { camera } = useThree();
   const vec = new THREE.Vector3();
-  
+
   // State to hold the current intensity and the delay timer
   const shakeIntensity = useRef(0);
   const shakeTimer = useRef(0);
+
+  // Mobile detection for gyro support
+  const isTouchDeviceRef = useRef(false);
+  const gyroEnabledRef = useRef(false);
+  const permissionRequestInFlightRef = useRef(false);
+
+  React.useEffect(() => {
+    const isTouchDevice =
+      'ontouchstart' in window ||
+      navigator.maxTouchPoints > 0 ||
+      (navigator as any).msMaxTouchPoints > 0;
+
+    isTouchDeviceRef.current = isTouchDevice;
+    gyroEnabledRef.current = gyroscopeManager.isActive;
+
+    const syncGyroEnabled = () => {
+      gyroEnabledRef.current = gyroscopeManager.isActive;
+    };
+
+    gyroscopeManager.addEventListener('orientationUpdate', syncGyroEnabled as EventListener);
+
+    // Only touch devices should attempt gyro parallax.
+    if (!isTouchDeviceRef.current || !gyroscopeManager.isAvailable) {
+      return () => {
+        gyroscopeManager.removeEventListener('orientationUpdate', syncGyroEnabled as EventListener);
+      };
+    }
+
+    const requestGyroPermission = async () => {
+      if (permissionRequestInFlightRef.current) {
+        return;
+      }
+
+      permissionRequestInFlightRef.current = true;
+      const granted = await gyroscopeManager.requestPermission();
+      if (granted) {
+        gyroEnabledRef.current = gyroscopeManager.isActive;
+
+        if (gyroEnabledRef.current) {
+          window.removeEventListener('touchstart', requestGyroPermission);
+          window.removeEventListener('pointerdown', requestGyroPermission);
+          window.removeEventListener('click', requestGyroPermission);
+        }
+      }
+
+      permissionRequestInFlightRef.current = false;
+    };
+
+    if (gyroscopeManager.requiresPermission) {
+      // iOS Safari: must be called from user gesture.
+      window.addEventListener('touchstart', requestGyroPermission, { passive: true });
+      window.addEventListener('pointerdown', requestGyroPermission, { passive: true });
+      window.addEventListener('click', requestGyroPermission, { passive: true });
+    } else {
+      // Android/other: eagerly attempt activation and keep gesture hooks as fallback.
+      gyroscopeManager.requestPermission().then((granted) => {
+        if (granted) {
+          gyroEnabledRef.current = gyroscopeManager.isActive;
+        }
+      });
+
+      window.addEventListener('touchstart', requestGyroPermission, { passive: true });
+      window.addEventListener('pointerdown', requestGyroPermission, { passive: true });
+      window.addEventListener('click', requestGyroPermission, { passive: true });
+    }
+
+    return () => {
+      gyroscopeManager.removeEventListener('orientationUpdate', syncGyroEnabled as EventListener);
+      window.removeEventListener('touchstart', requestGyroPermission);
+      window.removeEventListener('pointerdown', requestGyroPermission);
+      window.removeEventListener('click', requestGyroPermission);
+    };
+  }, []);
 
   // ==========================================
   // TWEAK VARIABLES TO ADJUST SHAKE ADJUSTMENTS
@@ -37,28 +111,42 @@ const CameraRig = () => {
     // Clamp delta to prevent huge jumps when alt-tabbing (inactive tab)
     const dt = Math.min(delta, 0.1);
 
-    const targetX = pointer.x * 1.2;
-    const targetY = pointer.y * 1.2;
-    
-    // Smooth lerp to mouse position
+    let targetX: number;
+    let targetY: number;
+
+    // Touch devices should not use touch-pointer position as parallax input.
+    // If gyro is not active yet, keep camera centered instead of cursor-like behavior.
+    if (isTouchDeviceRef.current && gyroEnabledRef.current) {
+      const gyroPointer = gyroscopeManager.getPointerFromOrientation();
+      targetX = gyroPointer.x * 1.2;
+      targetY = gyroPointer.y * 1.2;
+    } else if (isTouchDeviceRef.current) {
+      targetX = 0;
+      targetY = 0;
+    } else {
+      targetX = pointer.x * 1.2;
+      targetY = pointer.y * 1.2;
+    }
+
+    // Smooth lerp to target position
     camera.position.lerp(vec.set(targetX, targetY, 15), dt * 4);
     camera.lookAt(0, 0, 0);
-    
+
     // Trigger shake camera aggressively ONLY when scrolling down (forward) in Section 5
     if (scrollManager.scrollValue >= 3.99 && scrollManager.rawScrollDelta > 0.001) {
       shakeTimer.current = SHAKE_DURATION; // Reset the delay timer
     }
-    
+
     let targetShake = 0;
     if (shakeTimer.current > 0) {
       shakeTimer.current -= dt;
       targetShake = 1.0; // Stay at max while timer is active
     }
-    
+
     // Attack (ease in) and Decay (ease out) speeds
     const lerpSpeed = targetShake > shakeIntensity.current ? ATTACK_SPEED : DECAY_SPEED;
     shakeIntensity.current += (targetShake - shakeIntensity.current) * dt * lerpSpeed;
-    
+
     // Dynamically adjust FOV based on shake intensity
     const perspectiveCamera = camera as THREE.PerspectiveCamera;
     perspectiveCamera.fov = BASE_FOV + (FOV_BOOST * shakeIntensity.current);
@@ -66,12 +154,12 @@ const CameraRig = () => {
 
     if (shakeIntensity.current > 0.0001) {
       const timeScale = SHAKE_INTENSITY;
-      const t = clock.elapsedTime * timeScale; 
-      
+      const t = clock.elapsedTime * timeScale;
+
       // Slower, smoother sine waves for a "drifting" feel rather than a fast jitter
       const pitchShake = Math.sin(t * 1.5) * Math.sin(t * 0.8) * SHAKE_MAGNITUDE * shakeIntensity.current;
       const yawShake = Math.sin(t * 1.1) * Math.sin(t * 1.3) * SHAKE_MAGNITUDE * shakeIntensity.current;
-      
+
       // Apply rotational shake on top of the base lookAt rotation
       camera.applyQuaternion(new THREE.Quaternion().setFromEuler(new THREE.Euler(pitchShake, yawShake, 0)));
     }
@@ -89,10 +177,10 @@ const FrostedBackground = () => {
 
   // Calculate the exact visible bounds at Z = -50
   const currentViewport = viewport.getCurrentViewport(camera, vec.current.set(0, 0, -50));
-  
-  // Pad by 1.2x to ensure the camera rig's parallax movement never exposes the edges
-  const planeWidth = currentViewport.width * 1.2;
-  const planeHeight = currentViewport.height * 1.2;
+
+  // Pad by 1.5x to ensure the camera rig's parallax movement never exposes the edges (especially on narrow screens)
+  const planeWidth = currentViewport.width * 1.5;
+  const planeHeight = currentViewport.height * 1.5;
 
   useFrame(({ clock }) => {
     if (materialRef.current) {
@@ -161,7 +249,7 @@ const FrostedBackground = () => {
 
 const WebGLBackground: React.FC = () => {
   const { currentSection, scrollValue } = useScrollState();
-  
+
   return (
     <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: 0, background: '#ffffff' }}>
       <Canvas camera={{ position: [0, 0, 15], fov: 40, near: 0.01 }} dpr={[1, 2]}>
@@ -171,31 +259,31 @@ const WebGLBackground: React.FC = () => {
         <CameraRig />
         <Environment preset="city" />
         <RefractionManager />
-        
+
         {/* Render Section 1 (Index 0) */}
         <React.Suspense fallback={null}>
-          <Section13D 
+          <Section13D
             opacity={Math.max(0, Math.min(1, 1 - (scrollValue - 0.2) * 2.0))}
-            scrollValue={scrollValue} 
+            scrollValue={scrollValue}
           />
         </React.Suspense>
-        
+
         {/* Render Scene 2 (Index 1) */}
-        <Section2 
-          viewingState={currentSection === 1 ? 'viewing' : currentSection > 1 ? 'passed' : 'ready'} 
+        <Section2
+          viewingState={currentSection === 1 ? 'viewing' : currentSection > 1 ? 'passed' : 'ready'}
           scrollValue={scrollValue}
         />
-        
+
         {/* Render Scene 3 (Index 2) */}
-        <Section3 
+        <Section3
           scrollValue={scrollValue}
         />
-        
+
         {/* Render Scene 4 (Index 3) */}
-        <Section4 
+        <Section4
           scrollValue={scrollValue}
         />
-        
+
         {/* Render Scene 5 (Index 4) */}
         <Section5 />
       </Canvas>

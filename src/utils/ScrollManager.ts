@@ -6,12 +6,12 @@ class ScrollManager extends EventTarget {
   public currentSection: number = 0;
   public totalSections: number = 5;
   public scrollValue: number = 0;
-  
+
   // New features for dynamic internal scrolling for any section
   public internalScrollLimits: Record<number, number> = {};
   public internalScrollValue: number = 0;
   private targetInternalScrollValue: number = 0;
-  
+
   public scrollVelocity: number = 0;
   public rawScrollDelta: number = 0;
 
@@ -21,7 +21,13 @@ class ScrollManager extends EventTarget {
   private lastTime: number = 0;
   private lockedDirection: number = 0;
   private currentStiffness: number = 8.0;
-  
+
+  // Touch momentum/inertia scrolling
+  private touchVelocity: number = 0;
+  private lastTouchY: number = 0;
+  private lastTouchTime: number = 0;
+  private isTouching: boolean = false;
+
   // Time-based jump state
   private jumpTarget: number | null = null;
   private jumpStartValue: number = 0;
@@ -46,43 +52,95 @@ class ScrollManager extends EventTarget {
       window.addEventListener('touchstart', this.handleTouchStart, { passive: false });
       window.addEventListener('touchmove', this.handleTouchMove, { passive: false });
       window.addEventListener('touchend', this.handleTouchEnd, { passive: false });
+      window.addEventListener('touchcancel', this.handleTouchCancel, { passive: false });
     }
   }
-  
+
   public setInternalScrollLimit(section: number, limit: number) {
     this.internalScrollLimits[section] = limit;
+  }
+
+  private isInteractiveTarget(target: EventTarget | null): boolean {
+    if (!(target instanceof HTMLElement)) return false;
+
+    return !!target.closest(
+      'a, button, input, textarea, select, label, [role="button"], [contenteditable="true"], [data-allow-touch]'
+    );
   }
 
   private handleWheel = (e: WheelEvent) => {
     // Add to target scroll value based on wheel delta
     const delta = e.deltaY * 0.0015;
     this.applyScrollDelta(delta);
-    
+
     // When wheel stops, we need to snap. We can debounce a "stop" event.
     this.debounceSnap();
   };
 
   private handleTouchStart = (e: TouchEvent) => {
+    if (this.isInteractiveTarget(e.target)) {
+      this.isTouching = false;
+      return;
+    }
+
     this.touchStartY = e.touches[0].clientY;
+    this.lastTouchY = this.touchStartY;
+    this.lastTouchTime = performance.now();
+    this.isTouching = true;
+    this.touchVelocity = 0;
   };
 
   private handleTouchMove = (e: TouchEvent) => {
+    if (!this.isTouching) {
+      return;
+    }
+
+    if (e.cancelable) {
+      e.preventDefault();
+    }
+
     const touchY = e.touches[0].clientY;
-    const deltaY = this.touchStartY - touchY;
-    this.touchStartY = touchY;
-    
-    const delta = deltaY * 0.002;
+    const currentTime = performance.now();
+    const deltaY = this.lastTouchY - touchY;
+    const deltaTime = Math.max(currentTime - this.lastTouchTime, 1); // Minimum 1ms
+
+    // Calculate velocity for momentum (px/ms)
+    this.touchVelocity = deltaY / deltaTime;
+
+    this.lastTouchY = touchY;
+    this.lastTouchTime = currentTime;
+
+    // Increased sensitivity: 0.004 instead of 0.002 for better responsiveness
+    const delta = deltaY * 0.004;
     this.applyScrollDelta(delta);
   };
 
   private handleTouchEnd = () => {
+    this.isTouching = false;
+
+    // Apply momentum scrolling if velocity is significant
+    if (Math.abs(this.touchVelocity) > 0.2) {
+      // Convert velocity to scroll delta per frame
+      const momentumDelta = this.touchVelocity * 0.004;
+      this.applyScrollDelta(momentumDelta);
+
+      // Continue animation loop to handle momentum decay
+      this.startAnimationLoop();
+    } else {
+      this.snapToNearestSection();
+    }
+  };
+
+  private handleTouchCancel = () => {
+    this.isTouching = false;
+    this.touchVelocity = 0;
     this.snapToNearestSection();
   };
 
   private applyScrollDelta(delta: number) {
     this.currentStiffness = 8.0;
     this.jumpTarget = null; // Cancel any active jump when user manually scrolls
-    
+
     // Accumulate raw scroll delta for effects like camera shake
     this.rawScrollDelta = delta;
 
@@ -92,11 +150,11 @@ class ScrollManager extends EventTarget {
     if (this.lockedDirection === -1 && delta < 0) return;
 
     const internalLimit = this.internalScrollLimits[this.currentSection] || 0;
-    
+
     if (internalLimit > 0) {
       // Try to apply delta to internal scroll first
       const newInternalTarget = this.targetInternalScrollValue + delta;
-      
+
       if (newInternalTarget < 0) {
         // Spill over upwards
         const spill = newInternalTarget;
@@ -115,15 +173,15 @@ class ScrollManager extends EventTarget {
       // Normal global scroll
       this.targetScrollValue += delta;
     }
-    
+
     // Clamp the target global value between 0 and totalSections - 1
     this.targetScrollValue = Math.max(0, Math.min(this.totalSections - 1, this.targetScrollValue));
-    
+
     // Instantly commit if global threshold is crossed mid-scroll
     const diff = this.targetScrollValue - this.currentSection;
     if (Math.abs(diff) > PULL_THRESHOLD) {
       const prevSection = this.currentSection;
-      
+
       if (diff > 0 && this.currentSection < this.totalSections - 1) {
         this.currentSection += 1;
         this.lockedDirection = 1;
@@ -132,7 +190,7 @@ class ScrollManager extends EventTarget {
         this.lockedDirection = -1;
       }
       this.targetScrollValue = this.currentSection;
-      
+
       // If we switched sections, initialize the internal scroll target for the new section
       if (this.currentSection !== prevSection) {
         const newLimit = this.internalScrollLimits[this.currentSection] || 0;
@@ -147,7 +205,7 @@ class ScrollManager extends EventTarget {
         }
       }
     }
-    
+
     this.startAnimationLoop();
   }
 
@@ -162,7 +220,7 @@ class ScrollManager extends EventTarget {
       this.startAnimationLoop();
     }, 150) as unknown as number;
   }
-  
+
   private snapToNearestSection() {
     this.targetScrollValue = this.currentSection;
     this.startAnimationLoop();
@@ -182,17 +240,28 @@ class ScrollManager extends EventTarget {
 
     const diff = this.targetScrollValue - this.scrollValue;
 
+    // Apply momentum decay when not touching
+    if (!this.isTouching && Math.abs(this.touchVelocity) > 0.01) {
+      const momentumDelta = this.touchVelocity * 0.004;
+      this.applyScrollDelta(momentumDelta);
+
+      // Decay momentum (0.92 per frame creates smooth deceleration)
+      this.touchVelocity *= Math.pow(0.92, deltaTime * 60);
+    } else if (!this.isTouching) {
+      this.touchVelocity = 0;
+    }
+
     if (this.jumpTarget !== null) {
       // Time-based easeInOut jump
       const elapsed = time - this.jumpStartTime;
       const t = Math.min(elapsed / this.jumpDuration, 1.0);
-      
+
       // easeInOutCubic for a beautiful, non-linear smooth acceleration and deceleration
       const easeT = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-      
+
       this.scrollValue = this.jumpStartValue + (this.jumpTarget - this.jumpStartValue) * easeT;
       this.targetScrollValue = this.scrollValue; // Keep target in sync
-      
+
       if (t >= 1.0) {
         this.jumpTarget = null; // Jump finished
         this.targetScrollValue = Math.round(this.scrollValue);
@@ -200,16 +269,16 @@ class ScrollManager extends EventTarget {
     } else {
       // Normal physics-based scroll lerp
       this.scrollVelocity = diff * (deltaTime * this.currentStiffness);
-      this.scrollValue += this.scrollVelocity; 
+      this.scrollValue += this.scrollVelocity;
     }
-    
+
     // Decay raw scroll delta
     if (Math.abs(this.rawScrollDelta) > 0.0001) {
       this.rawScrollDelta *= Math.pow(0.1, deltaTime * 10);
     } else {
       this.rawScrollDelta = 0;
     }
-    
+
     // Smoothly lerp internal scroll
     const internalDiff = this.targetInternalScrollValue - this.internalScrollValue;
     this.internalScrollValue += internalDiff * (deltaTime * 8.0);
@@ -217,19 +286,19 @@ class ScrollManager extends EventTarget {
     // Update current integer section based on nearest whole number to actual scroll
     const nearestSection = Math.round(this.scrollValue);
     if (nearestSection !== this.currentSection && Math.abs(diff) < 0.1) {
-       // We only update the public currentSection once we've securely settled near it
-       if (nearestSection === Math.round(this.targetScrollValue)) {
-         this.currentSection = nearestSection;
-       }
+      // We only update the public currentSection once we've securely settled near it
+      if (nearestSection === Math.round(this.targetScrollValue)) {
+        this.currentSection = nearestSection;
+      }
     }
 
-    this.dispatchEvent(new CustomEvent('scrollUpdate', { 
-      detail: { 
+    this.dispatchEvent(new CustomEvent('scrollUpdate', {
+      detail: {
         currentSection: this.currentSection,
         scrollValue: this.scrollValue,
         internalScrollValue: this.internalScrollValue,
         scrollVelocity: this.scrollVelocity
-      } 
+      }
     }));
 
     const isPhysicalScrollSettled = this.jumpTarget === null && Math.abs(diff) <= 0.001 && Math.abs(internalDiff) <= 0.001;
@@ -249,13 +318,13 @@ class ScrollManager extends EventTarget {
       this.scrollVelocity = 0;
       this.isAnimating = false;
       this.lockedDirection = 0;
-      this.dispatchEvent(new CustomEvent('scrollUpdate', { 
-        detail: { 
+      this.dispatchEvent(new CustomEvent('scrollUpdate', {
+        detail: {
           currentSection: this.currentSection,
           scrollValue: this.scrollValue,
           internalScrollValue: this.internalScrollValue,
           scrollVelocity: this.scrollVelocity
-        } 
+        }
       }));
     }
   };
@@ -269,9 +338,9 @@ class ScrollManager extends EventTarget {
       }
       return;
     }
-    
+
     const distance = Math.abs(index - this.scrollValue);
-    
+
     // Setup time-based tween for jumping
     this.jumpTarget = index;
     this.jumpStartValue = this.scrollValue;
@@ -279,14 +348,14 @@ class ScrollManager extends EventTarget {
     // Base duration of 800ms, plus 300ms for each additional section. 
     // This ensures it never flies too fast, while giving enough time to appreciate the easing.
     this.jumpDuration = 800 + (distance - 1) * 300;
-    
+
     this.currentSection = index;
     this.targetScrollValue = index;
-    
+
     // Smoothly reset internal scroll when jumping to a section via nav dot
     this.targetInternalScrollValue = 0;
     this.lockedDirection = 0;
-    
+
     this.startAnimationLoop();
   }
 
