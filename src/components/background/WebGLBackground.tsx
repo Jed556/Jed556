@@ -38,7 +38,7 @@ const CameraRig = () => {
     gyroEnabledRef.current = gyroscopeManager.isActive;
 
     const syncGyroEnabled = () => {
-      gyroEnabledRef.current = gyroscopeManager.isActive;
+      gyroEnabledRef.current = true;
     };
 
     gyroscopeManager.addEventListener('orientationUpdate', syncGyroEnabled as EventListener);
@@ -50,49 +50,52 @@ const CameraRig = () => {
       };
     }
 
+    const removeGestureListeners = () => {
+      window.removeEventListener('touchstart', requestGyroPermission);
+      window.removeEventListener('touchend', requestGyroPermission);
+      window.removeEventListener('pointerdown', requestGyroPermission);
+      window.removeEventListener('click', requestGyroPermission);
+    };
+
     const requestGyroPermission = async () => {
       if (permissionRequestInFlightRef.current) {
         return;
       }
 
       permissionRequestInFlightRef.current = true;
-      const granted = await gyroscopeManager.requestPermission();
-      if (granted) {
-        gyroEnabledRef.current = gyroscopeManager.isActive;
-
-        if (gyroEnabledRef.current) {
-          window.removeEventListener('touchstart', requestGyroPermission);
-          window.removeEventListener('pointerdown', requestGyroPermission);
-          window.removeEventListener('click', requestGyroPermission);
+      try {
+        const granted = await gyroscopeManager.requestPermission();
+        if (granted) {
+          gyroEnabledRef.current = true;
+          removeGestureListeners();
         }
+      } finally {
+        permissionRequestInFlightRef.current = false;
       }
-
-      permissionRequestInFlightRef.current = false;
     };
 
     if (gyroscopeManager.requiresPermission) {
-      // iOS Safari: must be called from user gesture.
-      window.addEventListener('touchstart', requestGyroPermission, { passive: true });
-      window.addEventListener('pointerdown', requestGyroPermission, { passive: true });
+      // iOS Safari requires a user activation gesture (click or touchend)
+      window.addEventListener('touchend', requestGyroPermission, { passive: true });
       window.addEventListener('click', requestGyroPermission, { passive: true });
+      window.addEventListener('touchstart', requestGyroPermission, { passive: true });
     } else {
       // Android/other: eagerly attempt activation and keep gesture hooks as fallback.
       gyroscopeManager.requestPermission().then((granted) => {
         if (granted) {
-          gyroEnabledRef.current = gyroscopeManager.isActive;
+          gyroEnabledRef.current = true;
+          removeGestureListeners();
         }
       });
 
+      window.addEventListener('touchend', requestGyroPermission, { passive: true });
       window.addEventListener('touchstart', requestGyroPermission, { passive: true });
-      window.addEventListener('pointerdown', requestGyroPermission, { passive: true });
       window.addEventListener('click', requestGyroPermission, { passive: true });
     }
 
     return () => {
       gyroscopeManager.removeEventListener('orientationUpdate', syncGyroEnabled as EventListener);
-      window.removeEventListener('touchstart', requestGyroPermission);
-      window.removeEventListener('pointerdown', requestGyroPermission);
-      window.removeEventListener('click', requestGyroPermission);
+      removeGestureListeners();
     };
   }, []);
 
@@ -117,7 +120,8 @@ const CameraRig = () => {
 
     // Touch devices should not use touch-pointer position as parallax input.
     // If gyro is not active yet, keep camera centered instead of cursor-like behavior.
-    if (isTouchDeviceRef.current && gyroEnabledRef.current) {
+    const isGyroActive = gyroEnabledRef.current || gyroscopeManager.isActive;
+    if (isTouchDeviceRef.current && isGyroActive) {
       const gyroPointer = gyroscopeManager.getPointerFromOrientation();
       targetX = gyroPointer.x * 1.2;
       targetY = gyroPointer.y * 1.2;
