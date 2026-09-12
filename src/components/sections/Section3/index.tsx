@@ -181,21 +181,22 @@ export const Section3: React.FC<{ scrollValue: number }> = ({ scrollValue }) => 
   const { viewport: defaultViewport, size, camera, gl } = useThree();
   const viewport = defaultViewport.getCurrentViewport(camera, new THREE.Vector3(0, 0, 5));
 
-  const isMobile = size.width <= 768;
+  const isShortScreen = size.height <= 550;
+  const isMobile = size.width <= 768 || isShortScreen;
   const headerPx = isMobile ? 50 : 70;
   const footerPx = isMobile ? 50 : 60;
   const borderPx = (headerPx + footerPx) / 2;
   const pxToUnits = viewport.height / size.height;
   const borderUnits = borderPx * pxToUnits;
-  const visibleHalfHeight = viewport.height / 2 - borderUnits;
+  const visibleHalfHeight = Math.max(0.5, viewport.height / 2 - borderUnits);
 
   // We calculate the target scale here
   const targetScale = Math.max(0.35, Math.min(1.0, viewport.width / 16.0));
   const currentScaleRef = useRef(targetScale);
   
   // Calculate max height for cards to remain within cinematic borders with some padding
-  const paddingUnits = 0.8;
-  const maxCardHeight = ((visibleHalfHeight - paddingUnits) * 2) / targetScale;
+  const paddingUnits = isShortScreen ? Math.min(0.3, visibleHalfHeight * 0.25) : (isMobile ? 1.4 : 0.8);
+  const maxCardHeight = Math.max(1.0, ((visibleHalfHeight - paddingUnits) * 2) / targetScale);
   const GAP_SPACING = 2.0;
 
   const [textures, setTextures] = useState<(THREE.Texture | null)[][]>(flatProjects.map(() => []));

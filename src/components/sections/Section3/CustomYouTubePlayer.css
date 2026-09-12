@@ -175,3 +175,20 @@
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
+
+@media (max-height: 550px) {
+  .custom-yt-center-icon {
+    width: 56px;
+    height: 56px;
+  }
+  .custom-yt-controls-bar {
+    padding: 8px 12px;
+  }
+  .custom-yt-btn {
+    padding: 2px;
+  }
+  .custom-yt-time {
+    font-size: 10px;
+    min-width: 30px;
+  }
+}

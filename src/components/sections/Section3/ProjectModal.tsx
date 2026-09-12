@@ -100,7 +100,7 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({ project, onClose }) 
         onClick={onClose}
       />
 
-      <div className="modal-container">
+      <div className="modal-container" data-allow-touch>
         
         {/* Left Column (1/3) - Details */}
         <motion.div 
@@ -109,8 +109,9 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({ project, onClose }) 
           exit={{ x: '-50%', opacity: 0 }}
           transition={{ type: 'spring', damping: 25, stiffness: 200 }}
           className="modal-details"
+          data-allow-touch
         >
-          <div className="modal-details-scroll custom-scrollbar">
+          <div className="modal-details-scroll custom-scrollbar" data-allow-touch>
             <h2 className="modal-title">
               {project.name}
             </h2>
