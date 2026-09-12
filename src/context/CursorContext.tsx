@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState } from 'react';
 import type { ReactNode } from 'react';
 
-export type CursorVariant = 'default' | 'scroll-y' | 'scroll-x' | 'expand' | 'hidden' | 'loading';
+export type CursorVariant = 'default' | 'scroll-y' | 'scroll-x' | 'expand' | 'pointer' | 'hidden' | 'loading';
 
 interface CursorContextValue {
   variant: CursorVariant;

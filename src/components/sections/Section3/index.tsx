@@ -368,6 +368,15 @@ export const Section3: React.FC<{ scrollValue: number }> = ({ scrollValue }) => 
   }, [layoutCenters]);
 
   const groupsRef = useRef<(THREE.Group | null)[]>([]);
+  const cardMeshesRef = useRef<(THREE.Mesh | null)[]>([]);
+  const isHoveringCardRef = useRef(false);
+  const tempNdc = useMemo(() => new THREE.Vector2(), []);
+  const mousePosRef = useRef<{ clientX: number; clientY: number; isInside: boolean }>({
+    clientX: -9999,
+    clientY: -9999,
+    isInside: false,
+  });
+
   const textsRef = useRef<(any | null)[]>([]);
   const dateTextsRef = useRef<(any | null)[]>([]);
   
@@ -384,6 +393,28 @@ export const Section3: React.FC<{ scrollValue: number }> = ({ scrollValue }) => 
 
   const lastInternalScrollValue = useRef(0);
   const velocityRef = useRef(0);
+
+  // Track global mouse position to handle hover detection during scroll and frame updates
+  useEffect(() => {
+    const onPointer = (e: MouseEvent | PointerEvent | WheelEvent) => {
+      if (typeof e.clientX === 'number') {
+        mousePosRef.current.clientX = e.clientX;
+        mousePosRef.current.clientY = e.clientY;
+        mousePosRef.current.isInside = true;
+      }
+    };
+    const onMouseLeave = () => {
+      mousePosRef.current.isInside = false;
+    };
+    window.addEventListener('pointermove', onPointer, { passive: true });
+    window.addEventListener('wheel', onPointer, { passive: true });
+    document.addEventListener('mouseleave', onMouseLeave);
+    return () => {
+      window.removeEventListener('pointermove', onPointer);
+      window.removeEventListener('wheel', onPointer);
+      document.removeEventListener('mouseleave', onMouseLeave);
+    };
+  }, []);
 
   // Slideshow state
   const slideshowProgress = useRef<number[]>(new Array(flatProjects.length).fill(0));
@@ -409,6 +440,23 @@ export const Section3: React.FC<{ scrollValue: number }> = ({ scrollValue }) => 
       window.removeEventListener('wheel', handleCloseOnNavigate);
     };
   }, [activeProjectIndex]);
+
+  // Clear pointer cursor whenever modal is active or component unmounts
+  useEffect(() => {
+    if (activeProjectIndex !== null) {
+      isHoveringCardRef.current = false;
+      gl.domElement.removeAttribute('data-cursor');
+      window.dispatchEvent(new CustomEvent('cursor-target-change', { detail: 'default' }));
+    }
+  }, [activeProjectIndex, gl]);
+
+  useEffect(() => {
+    return () => {
+      isHoveringCardRef.current = false;
+      gl.domElement.removeAttribute('data-cursor');
+      window.dispatchEvent(new CustomEvent('cursor-target-change', { detail: 'default' }));
+    };
+  }, [gl]);
 
   useFrame((state, delta) => {
     const dt = Math.min(delta, 0.1);
@@ -581,6 +629,54 @@ export const Section3: React.FC<{ scrollValue: number }> = ({ scrollValue }) => 
       currentScaleRef.current = THREE.MathUtils.lerp(currentScaleRef.current, targetScale, 10 * dt);
       containerRef.current.scale.setScalar(currentScaleRef.current);
     }
+
+    // Real-time Card Hover & Cursor Raycast (handles both mouse movement and scroll movement)
+    const isSection3Interactive =
+      scrollValue > 1.2 &&
+      scrollValue < 2.8 &&
+      Math.abs(scrollValue - 2.0) <= 0.35 &&
+      activeProjectIndex === null &&
+      containerRef.current?.visible;
+
+    let isIntersectingAnyCard = false;
+
+    if (isSection3Interactive && mousePosRef.current.isInside) {
+      const { clientX, clientY } = mousePosRef.current;
+      const topEl = document.elementFromPoint(clientX, clientY);
+      if (topEl === gl.domElement) {
+        containerRef.current?.updateMatrixWorld();
+        tempNdc.set(
+          (clientX / size.width) * 2 - 1,
+          -(clientY / size.height) * 2 + 1
+        );
+        state.raycaster.setFromCamera(tempNdc, state.camera);
+
+        const candidateMeshes: THREE.Mesh[] = [];
+        for (let idx = 0; idx < flatProjects.length; idx++) {
+          const g = groupsRef.current[idx];
+          const m = cardMeshesRef.current[idx];
+          if (g && g.visible && m) {
+            candidateMeshes.push(m);
+          }
+        }
+
+        const hits = state.raycaster.intersectObjects(candidateMeshes, false);
+        if (hits.length > 0) {
+          isIntersectingAnyCard = true;
+        }
+      }
+    }
+
+    if (isIntersectingAnyCard !== isHoveringCardRef.current) {
+      isHoveringCardRef.current = isIntersectingAnyCard;
+      if (isIntersectingAnyCard) {
+        gl.domElement.setAttribute('data-cursor', 'pointer');
+        window.dispatchEvent(new CustomEvent('cursor-target-change', { detail: 'pointer' }));
+      } else {
+        gl.domElement.removeAttribute('data-cursor');
+        window.dispatchEvent(new CustomEvent('cursor-target-change', { detail: 'default' }));
+      }
+    }
   });
 
   return (
@@ -606,10 +702,14 @@ export const Section3: React.FC<{ scrollValue: number }> = ({ scrollValue }) => 
             position={[0, -20, 0]}
           >
             <mesh
+              ref={el => cardMeshesRef.current[i] = el}
               onClick={(e) => {
                 e.stopPropagation();
                 if (Math.abs(scrollValue - 2.0) > 0.4 || activeProjectIndex !== null) return;
                 setActiveProjectIndex(i);
+                isHoveringCardRef.current = false;
+                gl.domElement.removeAttribute('data-cursor');
+                window.dispatchEvent(new CustomEvent('cursor-target-change', { detail: 'default' }));
               }}
             >
               <planeGeometry args={[CARD_WIDTH, cardHeights[i], 1, 16]} />
@@ -633,6 +733,7 @@ export const Section3: React.FC<{ scrollValue: number }> = ({ scrollValue }) => 
 
             <Text
               ref={el => textsRef.current[i] = el}
+              raycast={() => null}
               position={[-CARD_WIDTH / 2 + 0.6, -cardHeights[i] / 2 + 0.8, 1.0]}
               renderOrder={10}
               material-depthTest={false}
@@ -650,6 +751,7 @@ export const Section3: React.FC<{ scrollValue: number }> = ({ scrollValue }) => 
 
             <Text
               ref={el => dateTextsRef.current[i] = el}
+              raycast={() => null}
               position={[-CARD_WIDTH / 2 + 0.6, -cardHeights[i] / 2 + (/[gjpqy,;Q]/.test(item.name.substring(0, 8)) ? 0.65 : 0.75), 1.0]}
               renderOrder={10}
               material-depthTest={false}
