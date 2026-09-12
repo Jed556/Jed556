@@ -102,6 +102,15 @@ export default function CustomCursor() {
   // Whether the cursor is currently representing a clickable interactive element
   const isClickable = variant === 'pointer' || variant === 'expand';
 
+  // Track if cursor has entered clickable state at least once to avoid initial load intro morph
+  const hasInteractedRef = useRef(false);
+  if (isClickable) {
+    hasInteractedRef.current = true;
+  }
+
+  const variantRef = useRef(variant);
+  variantRef.current = variant;
+
   // Keep mobile detection updated on resize or device change
   useEffect(() => {
     const handleResizeOrChange = () => {
@@ -337,7 +346,7 @@ export default function CustomCursor() {
 
   // Desktop mouse movement and approaching/hover detection
   const checkElementUnderCursor = useCallback((clientX: number, clientY: number) => {
-    if (variant === 'loading') return;
+    if (variantRef.current === 'loading') return;
 
     const centerEl = document.elementFromPoint(clientX, clientY) as HTMLElement | null;
     let info = getInteractiveTarget(centerEl);
@@ -370,7 +379,7 @@ export default function CustomCursor() {
     } else {
       setVariant('default');
     }
-  }, [setVariant, variant]);
+  }, [setVariant]);
 
   useEffect(() => {
     if (isMobile) return;
@@ -596,8 +605,14 @@ export default function CustomCursor() {
               className="cursor-morph-svg"
             >
               <motion.path
+                key={isClickable ? 'star-state' : 'circle-state'}
+                inherit={false}
                 fill="#ffffff"
-                initial={{ d: CIRCLE_PATH }}
+                initial={{
+                  d: isClickable
+                    ? CIRCLE_PATH
+                    : (hasInteractedRef.current ? STAR_REST_PATH : CIRCLE_PATH),
+                }}
                 animate={
                   isClickable
                     ? {
@@ -620,7 +635,7 @@ export default function CustomCursor() {
                     : {
                         d: {
                           duration: 0.22,
-                          ease: 'easeOut',
+                          ease: [0.16, 1, 0.3, 1],
                         },
                       }
                 }
