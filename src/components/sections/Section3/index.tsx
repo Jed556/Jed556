@@ -394,13 +394,20 @@ export const Section3: React.FC<{ scrollValue: number }> = ({ scrollValue }) => 
   const [activeProjectIndex, setActiveProjectIndex] = useState<number | null>(null);
 
   useEffect(() => {
-    const handleWheel = (e: WheelEvent) => {
-      if (activeProjectIndex !== null) {
+    const handleCloseOnNavigate = () => {
+      if (
+        activeProjectIndex !== null && 
+        (scrollManager.currentSection !== 2 || Math.abs(scrollManager.scrollValue - 2.0) > 0.35)
+      ) {
         setActiveProjectIndex(null);
       }
     };
-    window.addEventListener('wheel', handleWheel);
-    return () => window.removeEventListener('wheel', handleWheel);
+    scrollManager.addEventListener('scrollUpdate', handleCloseOnNavigate);
+    window.addEventListener('wheel', handleCloseOnNavigate);
+    return () => {
+      scrollManager.removeEventListener('scrollUpdate', handleCloseOnNavigate);
+      window.removeEventListener('wheel', handleCloseOnNavigate);
+    };
   }, [activeProjectIndex]);
 
   useFrame((state, delta) => {
@@ -569,6 +576,8 @@ export const Section3: React.FC<{ scrollValue: number }> = ({ scrollValue }) => 
     });
     
     if (containerRef.current) {
+      const isSection3Visible = scrollValue > 1.05 && scrollValue < 2.85;
+      containerRef.current.visible = isSection3Visible;
       currentScaleRef.current = THREE.MathUtils.lerp(currentScaleRef.current, targetScale, 10 * dt);
       containerRef.current.scale.setScalar(currentScaleRef.current);
     }
@@ -596,7 +605,13 @@ export const Section3: React.FC<{ scrollValue: number }> = ({ scrollValue }) => 
             ref={el => groupsRef.current[i] = el}
             position={[0, -20, 0]}
           >
-            <mesh onClick={() => setActiveProjectIndex(i)}>
+            <mesh
+              onClick={(e) => {
+                e.stopPropagation();
+                if (Math.abs(scrollValue - 2.0) > 0.4 || activeProjectIndex !== null) return;
+                setActiveProjectIndex(i);
+              }}
+            >
               <planeGeometry args={[CARD_WIDTH, cardHeights[i], 1, 16]} />
               <meshBasicMaterial
                 ref={el => frameMatsRef.current[i] = el as any}
