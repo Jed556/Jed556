@@ -11,6 +11,7 @@ import Section4DOM from './components/sections/Section4/Section4DOM';
 import Section5DOM from './components/sections/Section5/Section5DOM';
 import LoadingScreen from './components/loading/LoadingScreen';
 import { QualityBadge } from './components/hud/QualityBadge';
+import ScrollIndicator from './components/ui/ScrollIndicator';
 import { scrollManager } from './utils/ScrollManager';
 import './index.css';
 
@@ -68,6 +69,7 @@ function App() {
       <WebGLBackground />
       <CustomCursor />
       <QualityBadge isLoading={isLoading} />
+      <ScrollIndicator animationReady={animationReady} />
       {/* <FloatingMenu /> */}
     </CursorProvider>
   );

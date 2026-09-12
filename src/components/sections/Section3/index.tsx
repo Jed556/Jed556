@@ -9,6 +9,7 @@ import { GlassObjects } from './GlassObjects';
 import { ProjectModal } from './ProjectModal';
 import { AnimatePresence } from 'framer-motion';
 import { formatDate } from '../../../utils/dateFormatter';
+import { projectModalState } from '../../../utils/projectModalState';
 
 // --- Global Preload ---
 // Preloading at the module level ensures THREE.DefaultLoadingManager
@@ -423,6 +424,13 @@ export const Section3: React.FC<{ scrollValue: number }> = ({ scrollValue }) => 
 
   // Modal interaction
   const [activeProjectIndex, setActiveProjectIndex] = useState<number | null>(null);
+
+  useEffect(() => {
+    projectModalState.setOpen(activeProjectIndex !== null);
+    return () => {
+      projectModalState.setOpen(false);
+    };
+  }, [activeProjectIndex]);
 
   useEffect(() => {
     const handleCloseOnNavigate = () => {

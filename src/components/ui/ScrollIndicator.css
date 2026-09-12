@@ -1,0 +1,81 @@
+.global-scroll-indicator {
+  position: fixed;
+  bottom: 12vh;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 90;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  mix-blend-mode: difference;
+  user-select: none;
+  cursor: pointer;
+  transition: opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (max-width: 768px) {
+  .global-scroll-indicator {
+    bottom: 7vh;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+  }
+}
+
+.global-scroll-track {
+  position: relative;
+  width: 24px;
+  height: 28px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.global-scroll-line {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  transform: translateX(-50%);
+  background-color: #ffffff;
+  opacity: 0.5;
+  border-radius: 2px;
+  transition: opacity 0.3s ease;
+}
+
+.global-scroll-circle {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #ffffff;
+  pointer-events: none;
+}
+
+.global-scroll-text {
+  font-family: 'Space Mono', monospace;
+  font-size: clamp(8px, 0.7vw + 0.2vh, 10px);
+  font-weight: 700;
+  color: #ffffff;
+  opacity: 0.75;
+  text-transform: uppercase;
+  line-height: 1.15;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25em;
+  transition: opacity 0.3s ease;
+}
+
+.global-scroll-indicator:hover .global-scroll-line {
+  opacity: 0.85;
+}
+
+.global-scroll-indicator:hover .global-scroll-text {
+  opacity: 1;
+}
