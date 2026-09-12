@@ -12,6 +12,7 @@ import { scrollManager } from '../../utils/ScrollManager';
 import { gyroscopeManager } from '../../utils/GyroscopeManager';
 import { RefractionManager } from '../../utils/GlobalRefraction';
 import { GlobalStars } from './GlobalStars';
+import { useQuality } from '../../hooks/useQuality';
 
 // Camera Rig to handle mouse tracking, parallax, and scroll shake
 const CameraRig = () => {
@@ -249,10 +250,11 @@ const FrostedBackground = () => {
 
 const WebGLBackground: React.FC = () => {
   const { currentSection, scrollValue } = useScrollState();
+  const { dpr } = useQuality();
 
   return (
     <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: 0, background: '#ffffff' }}>
-      <Canvas camera={{ position: [0, 0, 15], fov: 40, near: 0.01 }} dpr={[1, 2]}>
+      <Canvas camera={{ position: [0, 0, 15], fov: 40, near: 0.01 }} dpr={dpr}>
         <FrostedBackground />
         <GlobalStars />
 

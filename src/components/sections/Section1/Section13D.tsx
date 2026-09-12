@@ -1,7 +1,8 @@
 import React, { useRef } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
-import { Float, Center, useFBO, Text3D, MeshTransmissionMaterial } from '@react-three/drei';
+import { Float, Center, useFBO, Text3D } from '@react-three/drei';
 import * as THREE from 'three';
+import { useQuality } from '../../../hooks/useQuality';
 
 interface Section13DProps {
   opacity: number;
@@ -255,6 +256,7 @@ const ForcefieldLens: React.FC<{ opacity: number }> = ({ opacity }) => {
 };
 
 const InteractiveCircle = ({ initialPos, size, color, floatSpeed, floatOffset, mobilePush = 0 }: { initialPos: [number, number, number], size: number, color: string, floatSpeed: number, floatOffset: number, mobilePush?: number }) => {
+  const { circleSegments } = useQuality();
   const meshRef = useRef<THREE.Mesh>(null);
   const target = useRef(new THREE.Vector3(...initialPos));
   const vec = new THREE.Vector3();
@@ -316,8 +318,8 @@ const InteractiveCircle = ({ initialPos, size, color, floatSpeed, floatOffset, m
 
   return (
     <mesh ref={meshRef} position={initialPos}>
-      <circleGeometry args={[size, 64]} />
-      {/* Reverted to built-in transmission to fix the black background bug caused by nested FBOs */}
+      <circleGeometry args={[size, circleSegments]} />
+      {/* Retain built-in transmission so the glass circles and refracted text never look dull */}
       <meshPhysicalMaterial 
         color={color}
         transmission={1.0}
@@ -344,6 +346,7 @@ const InteractiveCircles = () => {
 };
 
 const Section13D: React.FC<Section13DProps> = ({ opacity, scrollValue = 0 }) => {
+  const { textCurveSegments, textBevelSegments } = useQuality();
   const groupRef = useRef<THREE.Group>(null);
   const targetTextScale = useRef(1);
 
@@ -385,12 +388,12 @@ const Section13D: React.FC<Section13DProps> = ({ opacity, scrollValue = 0 }) => 
               font="/fonts/helvetiker_bold.typeface.json"
               size={3.2}
               height={0.1}
-              curveSegments={64}
+              curveSegments={textCurveSegments}
               bevelEnabled
               bevelThickness={0.7}
               bevelSize={0.3}
               bevelOffset={0}
-              bevelSegments={32}
+              bevelSegments={textBevelSegments}
             >
               hello
               <meshPhysicalMaterial

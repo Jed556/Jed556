@@ -10,6 +10,7 @@ import Section1DOM from './components/sections/Section1/Section1DOM';
 import Section4DOM from './components/sections/Section4/Section4DOM';
 import Section5DOM from './components/sections/Section5/Section5DOM';
 import LoadingScreen from './components/loading/LoadingScreen';
+import { QualityBadge } from './components/hud/QualityBadge';
 import { scrollManager } from './utils/ScrollManager';
 import './index.css';
 
@@ -66,6 +67,7 @@ function App() {
       <Section5DOM />
       <WebGLBackground />
       <CustomCursor />
+      <QualityBadge isLoading={isLoading} />
       {/* <FloatingMenu /> */}
     </CursorProvider>
   );

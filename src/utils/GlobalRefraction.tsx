@@ -11,10 +11,10 @@ export const globalRefraction = {
 
 export const RefractionManager = () => {
   const { gl, size, viewport } = useThree();
-  const dpr = Math.min(window.devicePixelRatio, 2);
+  const effectiveDpr = viewport.dpr || 1;
   
   // Use half resolution for the FBO to drastically improve performance (blur covers up low res)
-  const fbo = useFBO((size.width * dpr) / 2, (size.height * dpr) / 2);
+  const fbo = useFBO((size.width * effectiveDpr) / 2, (size.height * effectiveDpr) / 2);
 
   useFrame((state) => {
     // 1. Hide ALL glass objects globally

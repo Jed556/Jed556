@@ -4,9 +4,11 @@ import * as THREE from 'three';
 import { scrollManager } from '../../utils/ScrollManager';
 import { section4State } from '../sections/Section4';
 import { experiences, EXPERIENCE_SPACING } from '../../data/experience';
+import { useQuality } from '../../hooks/useQuality';
 
 export const GlobalStars = () => {
-  const count = 2000;
+  const { starCount } = useQuality();
+  const count = starCount;
   const meshRef = useRef<THREE.InstancedMesh>(null);
   const materialRef = useRef<THREE.ShaderMaterial>(null);
   
@@ -14,8 +16,9 @@ export const GlobalStars = () => {
   
   const particles = useMemo(() => {
     const temp = [];
+    const halfCount = Math.floor(count / 2);
     for (let i = 0; i < count; i++) {
-      const isDust = i < 1000; // Half dust, half stars
+      const isDust = i < halfCount; // Half dust, half stars
       
       let x, y, z;
       if (isDust) {
