@@ -7,7 +7,37 @@ import Transparents from './Transparents';
 
 // Shared texture for marquee — renders the repeating text strip
 const useMarqueeTexture = () => {
+  const font = 'italic 150px "RobotoFlex Baked 800", sans-serif';
+  const [fontsLoaded, setFontsLoaded] = useState(() => {
+    if (typeof document === 'undefined' || !document.fonts) return true;
+    try {
+      return document.fonts.check(font);
+    } catch {
+      return false;
+    }
+  });
+
+  useEffect(() => {
+    if (typeof document === 'undefined' || !document.fonts) {
+      setFontsLoaded(true);
+      return;
+    }
+    try {
+      if (document.fonts.check(font)) {
+        setFontsLoaded(true);
+        return;
+      }
+    } catch {}
+
+    let isMounted = true;
+    document.fonts.load(font)
+      .then(() => { if (isMounted) setFontsLoaded(true); })
+      .catch(() => { if (isMounted) setFontsLoaded(true); });
+    return () => { isMounted = false; };
+  }, [font]);
+
   return useMemo(() => {
+    void fontsLoaded;
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
 
@@ -18,7 +48,7 @@ const useMarqueeTexture = () => {
     
     // First pass to measure text
     if (ctx) {
-      ctx.font = 'italic 150px "RobotoFlex Baked 800", sans-serif';
+      ctx.font = font;
       const metrics = ctx.measureText(TEXT_STRING);
       textWidth = Math.ceil(metrics.width);
     }
@@ -33,7 +63,7 @@ const useMarqueeTexture = () => {
 
       ctx.fillStyle = '#ffffff';
       ctx.textBaseline = 'middle';
-      ctx.font = 'italic 150px "RobotoFlex Baked 800", sans-serif';
+      ctx.font = font;
 
       // Draw text once. Texture wrapping will seamlessly tile it with the exact GAP_SIZE
       ctx.fillText(TEXT_STRING, 0, canvas.height / 2);
@@ -45,29 +75,51 @@ const useMarqueeTexture = () => {
     tex.needsUpdate = true;
 
     return { tex, aspect: textWidth / 200 };
-  }, []);
+  }, [font, fontsLoaded]);
 };
 
 const textureCache = new Map<string, THREE.CanvasTexture>();
 const sharedPlaneGeometry = new THREE.PlaneGeometry(1, 1);
 
 const InstancedProjectsBackground = ({ scrollValue }: { scrollValue: number }) => {
-  const [fontsLoaded, setFontsLoaded] = useState(false);
-  
   const width = 5500;
   const height = 1300;
   const font = 'italic 400 780px "Impact", sans-serif';
   const color = "#ffffff"; // Changed to white so we can tint it dynamically
 
+  const [fontsLoaded, setFontsLoaded] = useState(() => {
+    if (typeof document === 'undefined' || !document.fonts) return true;
+    try {
+      return document.fonts.check(font);
+    } catch {
+      return false;
+    }
+  });
+
   useEffect(() => {
-    document.fonts.load(font).then(() => setFontsLoaded(true));
+    if (typeof document === 'undefined' || !document.fonts) {
+      setFontsLoaded(true);
+      return;
+    }
+    try {
+      if (document.fonts.check(font)) {
+        setFontsLoaded(true);
+        return;
+      }
+    } catch {}
+
+    let isMounted = true;
+    document.fonts.load(font)
+      .then(() => { if (isMounted) setFontsLoaded(true); })
+      .catch(() => { if (isMounted) setFontsLoaded(true); });
+    return () => { isMounted = false; };
   }, [font]);
   const scaleX = 0.77 * (width / 100);
   const scaleY = 0.77 * (height / 100);
 
   const filledTex = useMemo(() => {
     const cacheKey = `PROJECTS-${font}-${color}-false-${width}-${height}-center-0-1.2`;
-    if (textureCache.has(cacheKey) && fontsLoaded) return textureCache.get(cacheKey)!;
+    if (textureCache.has(cacheKey)) return textureCache.get(cacheKey)!;
     
     const canvas = document.createElement('canvas');
     canvas.width = width;
@@ -81,13 +133,15 @@ const InstancedProjectsBackground = ({ scrollValue }: { scrollValue: number }) =
     
     const tex = new THREE.CanvasTexture(canvas);
     tex.needsUpdate = true;
-    textureCache.set(cacheKey, tex);
+    if (fontsLoaded) {
+      textureCache.set(cacheKey, tex);
+    }
     return tex;
   }, [fontsLoaded]);
 
   const outlineTex = useMemo(() => {
     const cacheKey = `PROJECTS-${font}-${color}-true-${width}-${height}-center-0-1.2`;
-    if (textureCache.has(cacheKey) && fontsLoaded) return textureCache.get(cacheKey)!;
+    if (textureCache.has(cacheKey)) return textureCache.get(cacheKey)!;
     
     const canvas = document.createElement('canvas');
     canvas.width = width;
@@ -104,7 +158,9 @@ const InstancedProjectsBackground = ({ scrollValue }: { scrollValue: number }) =
     
     const tex = new THREE.CanvasTexture(canvas);
     tex.needsUpdate = true;
-    textureCache.set(cacheKey, tex);
+    if (fontsLoaded) {
+      textureCache.set(cacheKey, tex);
+    }
     return tex;
   }, [fontsLoaded]);
 
@@ -545,15 +601,54 @@ const CanvasText = ({
   velocityRef,
   ...meshProps
 }: any) => {
-  const [fontsLoaded, setFontsLoaded] = useState(false);
+  const [fontsLoaded, setFontsLoaded] = useState(() => {
+    if (typeof document === 'undefined' || !document.fonts) return true;
+    try {
+      return document.fonts.check(font);
+    } catch {
+      return false;
+    }
+  });
+
   useEffect(() => {
-    document.fonts.load(font).then(() => setFontsLoaded(true));
+    if (typeof document === 'undefined' || !document.fonts) {
+      setFontsLoaded(true);
+      return;
+    }
+    try {
+      if (document.fonts.check(font)) {
+        setFontsLoaded(true);
+        return;
+      }
+    } catch {}
+
+    let isMounted = true;
+    document.fonts.load(font)
+      .then(() => {
+        if (isMounted) setFontsLoaded(true);
+      })
+      .catch(() => {
+        try {
+          const firstFont = font.replace(/,\s*[^,]+$/, '');
+          document.fonts.load(firstFont).then(() => {
+            if (isMounted) setFontsLoaded(true);
+          }).catch(() => {
+            if (isMounted) setFontsLoaded(true);
+          });
+        } catch {
+          if (isMounted) setFontsLoaded(true);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
   }, [font]);
 
   const texture = useMemo(() => {
     const cacheKey = `${text}-${font}-${color}-${outline}-${width}-${height}-${textAlign}-${maxWidth}-${lineHeight}`;
-    // Bypass the cache to redraw if fonts were just loaded
-    if (textureCache.has(cacheKey) && fontsLoaded) {
+    // Only return from cache if it was saved with fonts loaded
+    if (textureCache.has(cacheKey)) {
       return textureCache.get(cacheKey)!;
     }
 
@@ -647,7 +742,9 @@ const CanvasText = ({
     }
     const tex = new THREE.CanvasTexture(canvas);
     tex.needsUpdate = true;
-    textureCache.set(cacheKey, tex);
+    if (fontsLoaded) {
+      textureCache.set(cacheKey, tex);
+    }
     return tex;
   }, [text, font, color, outline, width, height, textAlign, maxWidth, lineHeight, fontsLoaded]);
 

@@ -18,6 +18,38 @@
   src: url('/fonts/impact.ttf') format('truetype');
 }
 
+@font-face {
+  font-family: 'Arial';
+  src: local('Arial Bold Italic'), local('Arial-BoldItalic'), url('/fonts/Arial-BoldItalic.ttf') format('truetype');
+  font-weight: bold;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Arial';
+  src: local('Arial Bold'), local('Arial-Bold'), url('/fonts/Arial-Bold.ttf') format('truetype');
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Arial';
+  src: local('Arial Italic'), local('Arial-Italic'), url('/fonts/Arial-Italic.ttf') format('truetype');
+  font-weight: normal;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Arial';
+  src: local('Arial'), url('/fonts/Arial.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   --zzz-accent: #FFE600;
   --zzz-accent-rgb: 255, 230, 0;
