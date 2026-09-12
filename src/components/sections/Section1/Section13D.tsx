@@ -1,18 +1,16 @@
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { Float, Center, useFBO, Text3D } from '@react-three/drei';
 import * as THREE from 'three';
 import { useQuality } from '../../../hooks/useQuality';
+import { globalRenderState } from '../../../utils/RenderState';
 
 interface Section13DProps {
   opacity: number;
   scrollValue?: number;
 }
 
-const TRAIL_LENGTH = 100;
-
-// ... (skipping unchanged code for brevity, but I must replace the exact target content block)
-// The tool instruction says to update interface, and update the component. I will target the interface and the component start.
+const MAX_TRAIL = 40;
 
 const ForcefieldLens: React.FC<{ opacity: number }> = ({ opacity }) => {
   const fbo = useFBO();
@@ -20,7 +18,12 @@ const ForcefieldLens: React.FC<{ opacity: number }> = ({ opacity }) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const { pointer } = useThree();
   
-  const trailRef = useRef<{x: number, y: number, age: number}[]>([]);
+  // Pre-allocate fixed trail objects to eliminate GC allocation churn
+  const trailRef = useRef<{ x: number; y: number; age: number }[]>(
+    Array.from({ length: MAX_TRAIL }, () => ({ x: 0.5, y: 0.5, age: 0 }))
+  );
+  const trailDataArray = useRef(new Float32Array(MAX_TRAIL * 3));
+  const boundsVec = useRef(new THREE.Vector4(-1.0, -1.0, -1.0, -1.0));
   
   const mousePos = useRef<THREE.Vector2>(new THREE.Vector2(0.5, 0.5));
   const mouseVel = useRef<THREE.Vector2>(new THREE.Vector2(0.0, 0.0));
@@ -28,10 +31,19 @@ const ForcefieldLens: React.FC<{ opacity: number }> = ({ opacity }) => {
   const timeSinceLastPoint = useRef<number>(0.0);
   const initializedRef = useRef(false);
 
+  useEffect(() => {
+    return () => {
+      globalRenderState.isSection1Active = false;
+    };
+  }, []);
+
   useFrame((state, delta) => {
     const dt = Math.min(delta, 0.1);
-    if (opacity <= 0.01 || !meshRef.current) {
-      state.gl.render(state.scene, state.camera);
+    const isSectionActive = opacity > 0.01;
+    globalRenderState.isSection1Active = isSectionActive;
+
+    if (!isSectionActive || !meshRef.current) {
+      // Do NOT call state.gl.render here! RefractionManager handles screen rendering when Section 1 is inactive.
       return;
     }
     
@@ -43,6 +55,7 @@ const ForcefieldLens: React.FC<{ opacity: number }> = ({ opacity }) => {
        trailRef.current.forEach(pt => {
          pt.x = targetX;
          pt.y = targetY;
+         pt.age = 0;
        });
        initializedRef.current = true;
     }
@@ -77,58 +90,92 @@ const ForcefieldLens: React.FC<{ opacity: number }> = ({ opacity }) => {
     
     const trail = trailRef.current;
     
-    // The head of the trail must ALWAYS perfectly track the live 144Hz smooth spring position!
-    if (trail.length === 0) {
-      trail.push({ x: mousePos.current.x, y: mousePos.current.y, age: 1.0 });
+    // Fixed history snapshot interval (25ms = 40Hz)
+    // 40 points perfectly spans 1.0s of history with smooth segment interpolation
+    timeSinceLastPoint.current += dt;
+    if (timeSinceLastPoint.current >= 0.025) {
+      // Shift history points in-place without array reallocation or splice
+      for (let i = MAX_TRAIL - 1; i > 0; i--) {
+        trail[i].x = trail[i - 1].x;
+        trail[i].y = trail[i - 1].y;
+        trail[i].age = trail[i - 1].age;
+      }
+      trail[0].x = mousePos.current.x;
+      trail[0].y = mousePos.current.y;
+      trail[0].age = speedEnvelope.current > 0.0005 ? 1.0 : Math.max(0, trail[0].age - dt * decayRate);
+      timeSinceLastPoint.current %= 0.025;
     } else {
       trail[0].x = mousePos.current.x;
       trail[0].y = mousePos.current.y;
-      trail[0].age = 1.0;
-    }
-    
-    // To prevent the array from getting chopped off too early on 120Hz+ screens,
-    // we only lay down "history" points at a fixed 60Hz rate (16.6ms).
-    // This perfectly guarantees that 100 points = exactly 1.66 seconds of history on ANY monitor!
-    timeSinceLastPoint.current += dt;
-    if (timeSinceLastPoint.current >= 0.0166) {
-      // Snapshot the head into history
-      trail.splice(1, 0, { x: mousePos.current.x, y: mousePos.current.y, age: 1.0 });
-      if (trail.length > TRAIL_LENGTH) {
-        trail.length = TRAIL_LENGTH;
+      if (speedEnvelope.current > 0.0005) {
+        trail[0].age = 1.0;
       }
-      timeSinceLastPoint.current %= 0.0166;
     }
     
     // Apply the dynamic settle time
-    for (let i = 0; i < trail.length; i++) {
-      trail[i].age -= dt * decayRate;
+    for (let i = 1; i < MAX_TRAIL; i++) {
+      if (trail[i].age > 0) {
+        trail[i].age -= dt * decayRate;
+      }
     }
     
-    // Force the live head to stay fully alive
-    trail[0].age = 1.0;
-    
-    const uPoints = new Float32Array(TRAIL_LENGTH * 3);
-    for (let i = 0; i < TRAIL_LENGTH; i++) {
-      if (i < trail.length && trail[i].age > 0) {
-        uPoints[i * 3 + 0] = trail[i].x;
-        uPoints[i * 3 + 1] = trail[i].y;
-        uPoints[i * 3 + 2] = trail[i].age;
+    // Compute bounding box in aspect-corrected UV space and populate typed array in-place
+    const aspect = state.size.width / state.size.height;
+    let activeCount = 0;
+    let minAspectX = Infinity;
+    let maxAspectX = -Infinity;
+    let minY = Infinity;
+    let maxY = -Infinity;
+
+    const uPoints = trailDataArray.current;
+    for (let i = 0; i < MAX_TRAIL; i++) {
+      const pt = trail[i];
+      if (pt.age > 0.001) {
+        activeCount = i + 1;
+        uPoints[i * 3 + 0] = pt.x;
+        uPoints[i * 3 + 1] = pt.y;
+        uPoints[i * 3 + 2] = pt.age;
+
+        const ax = pt.x * aspect;
+        if (ax < minAspectX) minAspectX = ax;
+        if (ax > maxAspectX) maxAspectX = ax;
+        if (pt.y < minY) minY = pt.y;
+        if (pt.y > maxY) maxY = pt.y;
       } else {
         uPoints[i * 3 + 0] = 0;
         uPoints[i * 3 + 1] = 0;
         uPoints[i * 3 + 2] = 0;
       }
     }
+
+    // Maximum influence radius in aspect UV space (w > 0.001 within radius 0.18)
+    const padding = 0.20;
+    if (activeCount > 1 && maxAspectX >= minAspectX) {
+      boundsVec.current.set(
+        minAspectX - padding,
+        minY - padding,
+        maxAspectX + padding,
+        maxY + padding
+      );
+    } else {
+      // Completely off-screen / inactive bounds -> 100% of fragments early exit!
+      boundsVec.current.set(-1.0, -1.0, -1.0, -1.0);
+    }
     
+    // 1. Render clean scene into FBO
     meshRef.current.visible = false;
     state.gl.setRenderTarget(fbo);
     state.gl.render(state.scene, state.camera);
     state.gl.setRenderTarget(null);
     meshRef.current.visible = true;
 
+    // 2. Pass uniforms and render to screen
     if (materialRef.current) {
       materialRef.current.uniforms.tDiffuse.value = fbo.texture;
+      materialRef.current.uniforms.opacity.value = opacity;
       materialRef.current.uniforms.resolution.value.set(fbo.width, fbo.height);
+      materialRef.current.uniforms.uBounds.value.copy(boundsVec.current);
+      materialRef.current.uniforms.uActiveCount.value = activeCount;
       materialRef.current.uniforms.trailData.value = uPoints;
     }
 
@@ -147,7 +194,9 @@ const ForcefieldLens: React.FC<{ opacity: number }> = ({ opacity }) => {
           tDiffuse: { value: null },
           opacity: { value: opacity },
           resolution: { value: new THREE.Vector2(1, 1) },
-          trailData: { value: new Float32Array(TRAIL_LENGTH * 3) }
+          uBounds: { value: new THREE.Vector4(-1, -1, -1, -1) },
+          uActiveCount: { value: 0 },
+          trailData: { value: trailDataArray.current }
         }}
         vertexShader={`
           varying vec2 vUv;
@@ -160,26 +209,38 @@ const ForcefieldLens: React.FC<{ opacity: number }> = ({ opacity }) => {
           uniform sampler2D tDiffuse;
           uniform float opacity;
           uniform vec2 resolution;
-          uniform vec3 trailData[${TRAIL_LENGTH}];
+          uniform vec4 uBounds;
+          uniform int uActiveCount;
+          uniform vec3 trailData[${MAX_TRAIL}];
           varying vec2 vUv;
           
           vec2 sdSegmentWithT( in vec2 p, in vec2 a, in vec2 b ) {
             vec2 pa = p-a, ba = b-a;
-            float h = clamp( dot(pa,ba)/dot(ba,ba), 0.0, 1.0 );
-            return vec2(length( pa - ba*h ), h); // Returns distance and interpolation factor 't'
+            float d = dot(ba, ba);
+            float h = d > 0.000001 ? clamp( dot(pa,ba)/d, 0.0, 1.0 ) : 0.0;
+            return vec2(length( pa - ba*h ), h);
           }
           
           void main() {
             vec2 screenUv = gl_FragCoord.xy / resolution;
             float aspect = resolution.x / resolution.y;
-            vec2 aspectUv = screenUv;
-            aspectUv.x *= aspect;
+            vec2 aspectUv = vec2(screenUv.x * aspect, screenUv.y);
+
+            // Bounding box early exit: 90-100% of fragments outside the cursor wake exit instantly in 1 sample!
+            if (aspectUv.x < uBounds.x || aspectUv.x > uBounds.z ||
+                aspectUv.y < uBounds.y || aspectUv.y > uBounds.w) {
+              gl_FragColor = texture2D(tDiffuse, screenUv);
+              gl_FragColor.a *= opacity;
+              return;
+            }
             
             vec2 velSum = vec2(0.0);
             float weightSum = 0.0;
             float maxWeight = 0.0;
             
-            for (int i = 0; i < ${TRAIL_LENGTH} - 1; i++) {
+            for (int i = 0; i < ${MAX_TRAIL} - 1; i++) {
+              if (i >= uActiveCount - 1) break;
+
               vec3 p1 = trailData[i];
               vec3 p2 = trailData[i+1];
               
@@ -191,11 +252,8 @@ const ForcefieldLens: React.FC<{ opacity: number }> = ({ opacity }) => {
                 
                 vec2 segInfo = sdSegmentWithT(aspectUv, aP1, aP2);
                 float dist = segInfo.x;
-                float t = segInfo.y; // 0.0 to 1.0 along the segment
+                float t = segInfo.y;
                 
-                // PERFECTLY SMOOTH FORCEFIELD!
-                // By interpolating the age exactly along the mathematical segment line,
-                // we completely eliminate the "choppy dots" or "sausage" steps!
                 float segmentAge = mix(p1.z, p2.z, t);
                 float ageEased = smoothstep(0.0, 1.0, segmentAge);
                 
@@ -238,7 +296,6 @@ const ForcefieldLens: React.FC<{ opacity: number }> = ({ opacity }) => {
             vec3 finalColor = texture2D(tDiffuse, screenUv - offset * 0.2).rgb;
             
             // "SMUDGE" GHOSTS (True motion blur)
-            // Reduced duplicates/ghosting per user request
             for (float i = 1.0; i <= 3.0; i++) {
                 vec2 smudgeOffset = offset * (0.2 + i * 0.8); 
                 vec3 sampleCol = texture2D(tDiffuse, screenUv - smudgeOffset).rgb;

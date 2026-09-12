@@ -122,22 +122,19 @@ class QualityManager extends EventTarget {
     this.config.quality = quality;
 
     if (quality === 'low') {
-      // On mobile / low-end: 1x DPR cuts fill-rate load drastically (by up to 9x on 3x screens!)
-      // We keep bevelSegments at 14 and curveSegments at 24 so the specular shine on "hello"
-      // remains smooth and luminous, but with 60% fewer polygons.
       this.config.dpr = Math.min(dprCap, 1.0);
       this.config.starCount = 800;
-      this.config.textCurveSegments = 24;
-      this.config.textBevelSegments = 14;
-      this.config.circleSegments = 36;
+      this.config.textCurveSegments = 14;
+      this.config.textBevelSegments = 8;
+      this.config.circleSegments = 24;
     } else if (quality === 'medium') {
       this.config.dpr = Math.min(dprCap, 1.35);
       this.config.starCount = 1400;
-      this.config.textCurveSegments = 36;
-      this.config.textBevelSegments = 20;
-      this.config.circleSegments = 48;
+      this.config.textCurveSegments = 22;
+      this.config.textBevelSegments = 12;
+      this.config.circleSegments = 32;
     } else {
-      // High
+      // High (T3): Full original polygon fidelity (64 curve segments, 32 bevel segments, 64 circle segments)
       this.config.dpr = Math.min(dprCap, 2.0);
       this.config.starCount = 2000;
       this.config.textCurveSegments = 64;
