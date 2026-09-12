@@ -7,6 +7,22 @@
   mix-blend-mode: difference;
 }
 
+.cursor-scale-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.cursor-tap-ripple,
+.cursor-exit-ripple {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  box-sizing: border-box;
+}
+
 .custom-cursor {
   position: absolute;
   left: 0;

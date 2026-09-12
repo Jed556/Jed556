@@ -25,19 +25,52 @@ export function useMousePosition(springConfig = { damping: 25, stiffness: 400, m
   const requestRef = useRef<number>(0);
 
   useEffect(() => {
+    let lastTouchTime = 0;
+
+    const handleTouchStart = (e: TouchEvent) => {
+      lastTouchTime = Date.now();
+      if (e.touches.length > 0) {
+        const touch = e.touches[0];
+        // Snap springs immediately on new touch down so there's no cross-screen fling
+        if (typeof (x as any).jump === 'function') {
+          (x as any).jump(touch.clientX);
+          (y as any).jump(touch.clientY);
+        } else {
+          x.set(touch.clientX);
+          y.set(touch.clientY);
+        }
+        rawX.set(touch.clientX);
+        rawY.set(touch.clientY);
+        lastX.current = touch.clientX;
+        lastY.current = touch.clientY;
+        velocity.set(0);
+      }
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      lastTouchTime = Date.now();
+      if (e.touches.length > 0) {
+        rawX.set(e.touches[0].clientX);
+        rawY.set(e.touches[0].clientY);
+      }
+    };
+
     const handleMouseMove = (e: MouseEvent) => {
+      // Ignore synthesized mousemove events triggered by touch taps
+      if (Date.now() - lastTouchTime < 1000) return;
       rawX.set(e.clientX);
       rawY.set(e.clientY);
     };
 
     const handleMouseEnter = (e: MouseEvent) => {
+      if (Date.now() - lastTouchTime < 1000) return;
       rawX.set(e.clientX);
       rawY.set(e.clientY);
       
       // Snap springs immediately without animation
-      if (typeof x.jump === 'function') {
-        x.jump(e.clientX);
-        y.jump(e.clientY);
+      if (typeof (x as any).jump === 'function') {
+        (x as any).jump(e.clientX);
+        (y as any).jump(e.clientY);
       } else {
         x.set(e.clientX);
         y.set(e.clientY);
@@ -49,6 +82,8 @@ export function useMousePosition(springConfig = { damping: 25, stiffness: 400, m
       velocity.set(0);
     };
 
+    window.addEventListener('touchstart', handleTouchStart, { passive: true });
+    window.addEventListener('touchmove', handleTouchMove, { passive: true });
     window.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseenter', handleMouseEnter);
 
@@ -75,6 +110,8 @@ export function useMousePosition(springConfig = { damping: 25, stiffness: 400, m
     requestRef.current = requestAnimationFrame(updateVelocity);
 
     return () => {
+      window.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('touchmove', handleTouchMove);
       window.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseenter', handleMouseEnter);
       if (requestRef.current) cancelAnimationFrame(requestRef.current);
