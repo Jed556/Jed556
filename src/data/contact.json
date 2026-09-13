@@ -21,8 +21,18 @@
   },
   {
     "platform": "Instagram",
-    "url": "",
+    "url": "https://www.instagram.com/556jed",
     "icon": "/icons/instagram.svg"
+  },
+  {
+    "platform": "TikTok",
+    "url": "https://www.tiktok.com/@jed556",
+    "icon": "/icons/tiktok.svg"
+  },
+  {
+    "platform": "YouTube",
+    "url": "https://www.youtube.com/@556jed",
+    "icon": "/icons/youtube.svg"
   },
   {
     "platform": "Email",
