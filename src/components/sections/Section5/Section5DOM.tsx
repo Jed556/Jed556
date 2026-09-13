@@ -109,6 +109,10 @@ const Section5DOM: React.FC = () => {
               position: absolute;
               bottom: 10vh;
               display: flex;
+              justify-content: center;
+              align-items: center;
+              flex-wrap: wrap;
+              max-width: 90vw;
               pointer-events: auto;
             }
             @media (max-width: 768px) {

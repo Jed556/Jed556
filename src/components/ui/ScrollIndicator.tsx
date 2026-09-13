@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { scrollManager } from '../../utils/ScrollManager';
 import { projectModalState } from '../../utils/projectModalState';
+import { useScrollState } from '../../utils/useScrollState';
 import './ScrollIndicator.css';
 
 const LETTERS = ['S', 'C', 'R', 'O', 'L', 'L'];
@@ -75,21 +76,38 @@ const LetterRoulette: React.FC<{ isUp: boolean }> = ({ isUp }) => {
 };
 
 const ScrollIndicator: React.FC<ScrollIndicatorProps> = ({ animationReady = false }) => {
+  const { currentSection, scrollValue } = useScrollState();
   const [isVisible, setIsVisible] = useState(false);
   const [cycle, setCycle] = useState(0);
   const timerRef = useRef<number | null>(null);
   const hasShownInitialRef = useRef(false);
   const isModalOpenRef = useRef(projectModalState.isOpen);
+  const [isModalOpen, setIsModalOpen] = useState(projectModalState.isOpen);
+
+  // Consider it the last section if integer section is 4 or scroll value has transitioned past 3.5
+  const isLastSection =
+    currentSection >= scrollManager.totalSections - 1 || scrollValue >= 3.5;
 
   // 1. Initial page load reveal (after cinematic borders open)
   useEffect(() => {
     if (animationReady && !hasShownInitialRef.current) {
       hasShownInitialRef.current = true;
-      if (!isModalOpenRef.current) {
+      if (!isModalOpenRef.current && !isLastSection) {
         setIsVisible(true);
       }
     }
-  }, [animationReady]);
+  }, [animationReady, isLastSection]);
+
+  // Immediately hide if on the last section
+  useEffect(() => {
+    if (isLastSection) {
+      setIsVisible(false);
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+        timerRef.current = null;
+      }
+    }
+  }, [isLastSection]);
 
   // 2. Project card modal state tracking:
   // Strictly do not show when a card is open; start 10s countdown after the card is closed
@@ -97,6 +115,7 @@ const ScrollIndicator: React.FC<ScrollIndicatorProps> = ({ animationReady = fals
     const handleModalChange = (e: Event) => {
       const isOpen = (e as CustomEvent<{ isOpen: boolean }>).detail.isOpen;
       isModalOpenRef.current = isOpen;
+      setIsModalOpen(isOpen);
 
       if (isOpen) {
         setIsVisible(false);
@@ -110,7 +129,10 @@ const ScrollIndicator: React.FC<ScrollIndicatorProps> = ({ animationReady = fals
           clearTimeout(timerRef.current);
         }
         timerRef.current = window.setTimeout(() => {
-          if (!isModalOpenRef.current) {
+          const currentIsLast =
+            scrollManager.currentSection >= scrollManager.totalSections - 1 ||
+            scrollManager.scrollValue >= 3.5;
+          if (!isModalOpenRef.current && !currentIsLast) {
             setIsVisible(true);
           }
         }, 10000);
@@ -126,19 +148,26 @@ const ScrollIndicator: React.FC<ScrollIndicatorProps> = ({ animationReady = fals
   // 3. Scroll tracking & 10-second idle timer
   useEffect(() => {
     const handleScroll = () => {
-      if (isModalOpenRef.current) {
-        setIsVisible(false);
-        return;
-      }
-
       setIsVisible(false);
 
       if (timerRef.current) {
         clearTimeout(timerRef.current);
+        timerRef.current = null;
+      }
+
+      const currentIsLast =
+        scrollManager.currentSection >= scrollManager.totalSections - 1 ||
+        scrollManager.scrollValue >= 3.5;
+
+      if (isModalOpenRef.current || currentIsLast) {
+        return;
       }
 
       timerRef.current = window.setTimeout(() => {
-        if (!isModalOpenRef.current) {
+        const stillLast =
+          scrollManager.currentSection >= scrollManager.totalSections - 1 ||
+          scrollManager.scrollValue >= 3.5;
+        if (!isModalOpenRef.current && !stillLast) {
           setIsVisible(true);
         }
       }, 10000);
@@ -158,9 +187,11 @@ const ScrollIndicator: React.FC<ScrollIndicatorProps> = ({ animationReady = fals
     };
   }, []);
 
+  const shouldShow = isVisible && !isLastSection && !isModalOpen;
+
   // 4. Synchronized 3-second cycle loop for both circle and text roulette
   useEffect(() => {
-    if (!isVisible) {
+    if (!shouldShow) {
       setCycle(0);
       return;
     }
@@ -170,9 +201,10 @@ const ScrollIndicator: React.FC<ScrollIndicatorProps> = ({ animationReady = fals
     }, 3000);
 
     return () => clearInterval(interval);
-  }, [isVisible]);
+  }, [shouldShow]);
 
   const handleClick = () => {
+    if (isLastSection) return;
     const next =
       scrollManager.currentSection < scrollManager.totalSections - 1
         ? scrollManager.currentSection + 1
@@ -191,8 +223,8 @@ const ScrollIndicator: React.FC<ScrollIndicatorProps> = ({ animationReady = fals
       data-cursor="pointer"
       aria-label="Scroll to navigate"
       style={{
-        pointerEvents: isVisible ? 'auto' : 'none',
-        opacity: isVisible ? 1 : 0,
+        pointerEvents: shouldShow ? 'auto' : 'none',
+        opacity: shouldShow ? 1 : 0,
       }}
     >
       {/* Track & moving circle illustration */}
